@@ -1,4 +1,4 @@
-function [A,C] = Tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb)
+function [A,C] = Tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb,Tbt)
 %this function builds matrix and column vector coefficients that
 %are needed to solve the implicit form of the temperature advection-
 %diffusion equation.  A and C are coefficients such that in the 

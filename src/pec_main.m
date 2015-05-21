@@ -89,7 +89,7 @@ for i = 1:nstep-1
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
         
     % create del-squared stiffness matrix for diffusion term in heat eq.
-    [AimpT,CimpT] = Tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb);
+    [AimpT,CimpT] = Tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb,Tbt);
 
     % compute T2 using implicit technique
     [BimpT,DimpT] = Tadvectcoeff2(nx,nz,d,qx2,qz2,rhof2,cf2, ...

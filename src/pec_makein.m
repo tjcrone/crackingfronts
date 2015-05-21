@@ -9,20 +9,20 @@ function [] = pec_makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'cf013t';
+infilename = 'cf001t';
 overwrite = 1; % flag for overwriting existing infile (will ask first)
 
 % time stepping variables
-stepsize = 1e5; % step size in seconds
-runtime = 3e8; % total run time in seconds (3e9 is about 100 years)
+stepsize = 1e8; % step size in seconds
+runtime = 3e12; % total run time in seconds (3e9 is about 100 years)
 t = [0:stepsize:runtime-stepsize];
 nstep = length(t);
 nout = nstep/10; % number of steps to output (must be divisor of nstep)
 
 % define domain geometry
-nx = 200; % number of grid cells in x-direction (columns)
-nz = 400; % number of grid cells in z-direction (rows)
-d = 5; % grid cell size (uniform grid, meters)
+nx = 4; % number of grid cells in x-direction (columns)
+nz = 50; % number of grid cells in z-direction (rows)
+d = 20; % grid cell size (uniform grid, meters)
 nopen = 200; % number of grid cells that are initially open to flow
 
 % some constants
@@ -32,8 +32,8 @@ lamdam = 2; % rock thermal conductivity (basalt)
 alpham = 2e-5; % rock thermal expansion coefficient (basalt)
 phi = ones(nz,nx)*0.03; % porosity
 
-kx = ones(nz,nx)*1e-13;  % permeability in x-direction
-kz = ones(nz,nx)*1e-13;  % permeability in z-direction
+kx = ones(nz,nx)*1e-32;  % permeability in x-direction
+kz = ones(nz,nx)*1e-32;  % permeability in z-direction
 kz(nopen+1:end,:) = 1e-32;
 kx(nopen+1:end,:) = 1e-32;
 g = 9.8; % gravity
@@ -45,30 +45,31 @@ nuu = ones(nz,nx)*0.39; % undrained Poisson's ratio
 
 % initial temperature conditions
 Tcold = 0;
-Thot = 350;
-x = linspace(d/2,(nx-1)*d,nx);
-z = linspace(d/2,(nopen-1)*d,nopen);
-[X,Z] = meshgrid(x,z);
-T = Z*(Thot-Tcold)/(nopen*d)+Tcold;
+Thot = 1000;
+%x = linspace(d/2,(nx-1)*d,nx);
+%z = linspace(d/2,(nopen-1)*d,nopen);
+%[X,Z] = meshgrid(x,z);
+%T = Z*(Thot-Tcold)/(nopen*d)+Tcold;
 %T = X*(Thot-Tcold)/(nz*d)+Tcold;
-T = T + 2*(rand(nopen,nx)-0.5).*(Thot-Tcold)./100;
-T(T>Thot) = Thot;
-T(T<Tcold) = Tcold;
-T = [T; ones(nz-nopen,nx)*Thot];
+%T = T + 2*(rand(nopen,nx)-0.5).*(Thot-Tcold)./100;
+%T(T>Thot) = Thot;
+%T(T<Tcold) = Tcold;
+%T = [T; ones(nz-nopen,nx)*Thot];
+T = phi*0+Tcold;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet 2=Flux)
 % first row/column is value, second is type
 % note: flux type (2) should no longer be used
 Tbt = [ones(1,nx)*Tcold; ones(1,nx)*1]; % Dirichlet cold
-%Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
-Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
+%Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 
 % load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
-   load('../../Hydro/hydrotab7.mat');
+   load('../hydrotables/hydrotab7.mat');
 end
 
 % calculate starting pressure field uxing calcinitP
