@@ -9,7 +9,7 @@ function [] = pec_main(inputfile)
 load(['../in_out/',inputfile]);
 
 % change time stepping for testing
-%t = [0:1e6:1e10];
+%t = [0:1e2:1e6];
 %nstep = length(t);
 %nout = nstep;
 
@@ -107,6 +107,8 @@ for i = 1:nstep-1
     T2 = reshape(T2,nz,nx);
     T2(T2<0) = 0; %a kluge to prevent negative temperatures
 
+    %T2(15:end,10) = 300;
+    
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = Pstiff(nx,nz,d,Se2,rhof2, ...
         rhobt,rhobb,rhobr,rhobl,qx2,qz2,kx,kz,mu2,g,T2,Pbt, ...
@@ -129,13 +131,6 @@ for i = 1:nstep-1
         
     % compute darcy velocities (t=2)
     [qx2,qz2] = pec_darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
-
-    %  
-
-
-
-
-
         
     % shift variables
     P1 = P2;

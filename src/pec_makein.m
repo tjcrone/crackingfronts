@@ -9,21 +9,21 @@ function [] = pec_makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'cf001t';
+infilename = 'cf005t';
 overwrite = 1; % flag for overwriting existing infile (will ask first)
 
 % time stepping variables
-stepsize = 1e8; % step size in seconds
-runtime = 3e12; % total run time in seconds (3e9 is about 100 years)
-t = [0:stepsize:runtime-stepsize];
+stepsize = 1e6; % step size in seconds
+runtime = 1e10; % total run time in seconds (3e9 is about 100 years)
+t = 0:stepsize:runtime-stepsize;
 nstep = length(t);
 nout = nstep/10; % number of steps to output (must be divisor of nstep)
 
 % define domain geometry
-nx = 4; % number of grid cells in x-direction (columns)
-nz = 50; % number of grid cells in z-direction (rows)
-d = 20; % grid cell size (uniform grid, meters)
-nopen = 200; % number of grid cells that are initially open to flow
+nx = 25; % number of grid cells in x-direction (columns)
+nz = 25; % number of grid cells in z-direction (rows)
+d = 40; % grid cell size (uniform grid, meters)
+%nopen = 200; % number of grid cells that are initially open to flow
 
 % some constants
 rhom = 2950; % rock or grain density (basalt)
@@ -32,10 +32,12 @@ lamdam = 2; % rock thermal conductivity (basalt)
 alpham = 2e-5; % rock thermal expansion coefficient (basalt)
 phi = ones(nz,nx)*0.03; % porosity
 
-kx = ones(nz,nx)*1e-32;  % permeability in x-direction
-kz = ones(nz,nx)*1e-32;  % permeability in z-direction
-kz(nopen+1:end,:) = 1e-32;
-kx(nopen+1:end,:) = 1e-32;
+kx = ones(nz,nx)*1e-12;  % permeability in x-direction
+kz = ones(nz,nx)*1e-12;  % permeability in z-direction
+%kz(15:end,10) = 1e-32;
+%kx(15:end,10) = 1e-32;
+%kx(1,:) = 1e-32;
+%kz(1,:) = 1e-32;
 g = 9.8; % gravity
 
 % elastic properties
@@ -45,17 +47,19 @@ nuu = ones(nz,nx)*0.39; % undrained Poisson's ratio
 
 % initial temperature conditions
 Tcold = 0;
-Thot = 1000;
-%x = linspace(d/2,(nx-1)*d,nx);
-%z = linspace(d/2,(nopen-1)*d,nopen);
-%[X,Z] = meshgrid(x,z);
+Thot = 300;
+x = linspace(d/2,(nx-1)*d,nx);
+z = linspace(d/2,(nz-1)*d,nz);
+[X,Z] = meshgrid(x,z);
 %T = Z*(Thot-Tcold)/(nopen*d)+Tcold;
-%T = X*(Thot-Tcold)/(nz*d)+Tcold;
-%T = T + 2*(rand(nopen,nx)-0.5).*(Thot-Tcold)./100;
-%T(T>Thot) = Thot;
-%T(T<Tcold) = Tcold;
+%T = Z*(Thot-Tcold)/(nz*d)+Tcold;
+T = fliplr(X*(Thot-Tcold)/(nx*d)+Tcold);
+T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100;
+T(T>Thot) = Thot;
+T(T<Tcold) = Tcold;
 %T = [T; ones(nz-nopen,nx)*Thot];
-T = phi*0+Tcold;
+%T = phi*0+Tcold;
+%T(15:end,10) = 300;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet 2=Flux)
 % first row/column is value, second is type
@@ -65,6 +69,12 @@ Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
 %Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
+
+% change
+%Tbt = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+Tbr = [ones(nz,1)*Tcold ones(nz,1)*1]; % Dirichlet cold
+Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
@@ -110,7 +120,7 @@ if nameexist ~= -1 & overwrite == 1
 end
 
 % save variables to an input .mat file
-save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','nopen','d','cm','lamdam','phi','rhom', ...
+save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','d','cm','lamdam','phi','rhom', ...
    'kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
    'Vpu','nuu','Ks','alpham','Pref','rhobound','Pbound','t');
 
