@@ -1,4 +1,4 @@
-function [initP,Pbound,dPdzbound,rhobound] = calcinitP(nx,nz,T,Tbt,Tbb,Ptop,TT,PP,RHO,g,d);
+function [initP,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT,PP,RHO,g,d);
 %this function calculates the initial pressure distribution within
 %the model domain assuming a hydrostatic pressure gradient, and flow
 %only in the z-direction.  at the moment, it only works for initial

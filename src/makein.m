@@ -9,11 +9,11 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing03';
+infilename = 'testing04';
 
 % time stepping variables
 stepsize = 1e6; % step size in seconds
-runtime = 1e10; % total run time in seconds (3e9 is about 100 years)
+runtime = 1e9; % total run time in seconds (3e9 is about 100 years)
 t = 0:stepsize:runtime-stepsize; % time vector built from stepsize and runtime
 nstep = length(t); % number of steps required in model run
 nout = nstep/10; % number of steps to output (must be divisor of nstep)
@@ -62,9 +62,9 @@ if isempty(TT)
    load('../hydrotables/hydrotab7.mat');
 end
 
-% calculate starting pressure field uxing calcinitP
+% calculate starting pressure field uxing calcinitp
 Ptop = 20e6; % average seafloor pressure at top of domain
-[initP,Pbound,dPdzbound,rhobound] = calcinitP(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
+[initP,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
     PP,RHO,g,d);
 P = initP;
 Pref = P;
