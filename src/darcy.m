@@ -1,4 +1,4 @@
-function [qx,qz] = pec_darcy(nx,nz,P,rhof,rhobb,kx,kz,mu,g,d,Pbt,Pbb,Pbr,Pbl,T);
+function [qx,qz] = darcy(nx,nz,P,rhof,rhobb,kx,kz,mu,g,d,Pbt,Pbb,Pbr,Pbl,T);
 %This function computes the Darcy velocities in the x and z
 %directions on the interfaces of control volumes in the model
 %domain.  Model grid spacing must be uniform and specified by

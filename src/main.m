@@ -1,4 +1,4 @@
-function [] = pec_main(inputfile)
+function [] = main(inputfile)
 % This is the main poroelastic convection model function.  It loads the
 % input variables specified by INPUTFILE, then commences a convection run
 % saving the outputs to a file with the same prefix as the input file.
@@ -49,7 +49,7 @@ cfbr = interptim(PP,TT,CP,P1(:,end)./100000,Tbr(:,1));
 cfbl = interptim(PP,TT,CP,P1(:,1)  ./100000,Tbl(:,1));
 
 %compute darcy velocities (t=1)
-[qx1,qz1] = pec_darcy(nx,nz,P1,rhof1,rhobb,kx,kz,mu1,g,d,Pbt,Pbb,Pbr,Pbl,T1);
+[qx1,qz1] = darcy(nx,nz,P1,rhof1,rhobb,kx,kz,mu1,g,d,Pbt,Pbb,Pbr,Pbl,T1);
 
 %***Initialize Output Data Storage Locations***
 rhofout = zeros(nz,nx,nout);
@@ -130,7 +130,7 @@ for i = 1:nstep-1
     cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
         
     % compute darcy velocities (t=2)
-    [qx2,qz2] = pec_darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
+    [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
         
     % shift variables
     P1 = P2;

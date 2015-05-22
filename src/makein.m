@@ -1,4 +1,4 @@
-function [] = pec_makein()
+function [] = makein()
 % This function creates the input .mat file for the main function.
 % The .mat file produced will contain all the needed variables to begin
 % a new porous convection run. All units are SI, unless otherwise
@@ -9,7 +9,7 @@ function [] = pec_makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing02';
+infilename = 'testing03';
 
 % time stepping variables
 stepsize = 1e6; % step size in seconds

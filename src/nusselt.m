@@ -1,4 +1,4 @@
-function [Nu] = pec_nusselt(nx,nz,d,T,P,lamdam,Tbt,Tbb,kx,kz,g, ...
+function [Nu] = nusselt(nx,nz,d,T,P,lamdam,Tbt,Tbb,kx,kz,g, ...
    Pbt,Pbb,Pbr,Pbl)
 % This function computes the nusselt number for horizontal
 % layers in a 2-D porous convection computational domain that
@@ -17,7 +17,7 @@ end
 rhof = interptim(PP,TT,RHO,P./100000,T);
 cf = interptim(PP,TT,CP,P./100000,T);
 mu = dynvisc(T);
-[qx,qz] = pec_darcy(nx,nz,P,rhof,rhobb,kx,kz,mu,g,d,Pbt,Pbb,Pbr,Pbl,T);
+[qx,qz] = darcy(nx,nz,P,rhof,rhobb,kx,kz,mu,g,d,Pbt,Pbb,Pbr,Pbl,T);
 
 % compute conductive transport
 Qc = -lamdam.*(Tbb(1,1)-Tbt(1,1)).*((nx+1)/(nz+1));
