@@ -12,8 +12,8 @@ function [] = makein()
 infilename = 'testing05';
 
 % time stepping variables
-stepsize = 1e6; % step size in seconds
-runtime = 1e9; % total run time in seconds (3e9 is about 100 years)
+stepsize = 1e5; % step size in seconds
+runtime = 1e10; % total run time in seconds (3e9 is about 100 years)
 t = 0:stepsize:runtime-stepsize; % time vector built from stepsize and runtime
 nstep = length(t); % number of steps required in model run
 nout = nstep/10; % number of steps to output (must be divisor of nstep)
@@ -33,6 +33,10 @@ kx = ones(nz,nx)*1e-12;  % permeability in x-direction
 kz = ones(nz,nx)*1e-12;  % permeability in z-direction
 g = 9.8; % gravitational constant
 
+% define logical for impermeable regions
+kimperm = logical(kx*0);
+kimperm(13:end,7) = 1; 
+
 % initial temperature conditions
 Tcold = 0;
 Thot = 300;
@@ -43,11 +47,11 @@ T = Z*(Thot-Tcold)/(nz*d)+Tcold;
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
-T(6:end,1) = Thot;
+T(13:end,7) = Thot;
 
-% define regions where temperatures will remain constant
+% define logical for regions where temperatures will remain constant
 Tconst = logical(T*0);
-Tconst(6:end,1) = 1;
+Tconst(13:end,7) = 1;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
@@ -98,5 +102,5 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','t','topconduction','Tconst');
+   'alpham','rhobound','Pbound','t','topconduction','Tconst','kimperm');
 disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
