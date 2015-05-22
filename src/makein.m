@@ -64,10 +64,8 @@ end
 
 % calculate starting pressure field uxing calcinitp
 Ptop = 20e6; % average seafloor pressure at top of domain
-[initP,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
+[P,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
     PP,RHO,g,d);
-P = initP;
-Pref = P;
 
 % pressure boundary conditions (0=Neumann 1=Dirichlet)
 Pbt = [ones(1,nx).*Ptop;ones(1,nx)*1]; % open
@@ -95,5 +93,5 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','Pref','rhobound','Pbound','t','topconduction');
+   'alpham','rhobound','Pbound','t','topconduction');
 disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
