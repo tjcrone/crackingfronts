@@ -36,7 +36,7 @@ P1 = P;
 mu1 = dynvisc(T1); %fluid viscosity
 rhof1 = interptim(PP,TT,RHO,P1./100000,T1); %fluid density
 cf1 = interptim(PP,TT,CP,P1./100000,T1); %fluid heat capacity
-Se1 = T*0+1;
+Se1 = T1*0+1;
 
 %compute boundary fluid properties
 rhobt = interptim(PP,TT,RHO,Tbt(1,:)*0+Ptop./100000,Tbt(1,:));
@@ -107,7 +107,8 @@ for i = 1:nstep-1
     T2 = reshape(T2,nz,nx);
     T2(T2<0) = 0; %a kluge to prevent negative temperatures
 
-    %T2(15:end,10) = 300;
+    % apply constant temperature constraint
+    T2(Tconst)=T(Tconst);
     
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...

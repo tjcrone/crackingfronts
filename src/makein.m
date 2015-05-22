@@ -9,7 +9,7 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing04';
+infilename = 'testing05';
 
 % time stepping variables
 stepsize = 1e6; % step size in seconds
@@ -43,6 +43,11 @@ T = Z*(Thot-Tcold)/(nz*d)+Tcold;
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
+T(6:end,1) = Thot;
+
+% define regions where temperatures will remain constant
+Tconst = logical(T*0);
+Tconst(6:end,1) = 1;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
@@ -93,5 +98,5 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','t','topconduction');
+   'alpham','rhobound','Pbound','t','topconduction','Tconst');
 disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
