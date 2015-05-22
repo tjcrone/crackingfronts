@@ -9,7 +9,7 @@ function [] = pec_makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing01';
+infilename = 'testing02';
 
 % time stepping variables
 stepsize = 1e6; % step size in seconds
@@ -52,6 +52,10 @@ Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 
+% top boundary conduction
+% set this variable to unity to have the conduction across the top boundary
+topconduction = 0;
+
 % load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
@@ -91,5 +95,5 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','Pref','rhobound','Pbound','t');
+   'alpham','Pref','rhobound','Pbound','t','topconduction');
 disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
