@@ -8,11 +8,6 @@ function [] = main(inputfile)
 % load input file (no path, no extension)
 load(['../in_out/',inputfile]);
 
-% change time stepping for testing
-%t = [0:1e2:1e6];
-%nstep = length(t);
-%nout = nstep;
-
 % build outfile name
 outfilename = inputfile(1:strfind(inputfile,'_')-1);
 fulloutfilename = ['../in_out/',outfilename,'_fin'];
@@ -48,7 +43,7 @@ cfbb = interptim(PP,TT,CP,Pbound./100000,Tbb(1,:));
 cfbr = interptim(PP,TT,CP,P1(:,end)./100000,Tbr(:,1));
 cfbl = interptim(PP,TT,CP,P1(:,1)  ./100000,Tbl(:,1));
 
-% apply kimperm
+% apply initial kimperm
 kx(kimperm) = 1e-32;
 kz(kimperm) = 1e-32;
 
@@ -85,10 +80,24 @@ tic;
 
 %time loop
 for i = 1:nstep-1
+
+    % apply permeability model 
     
-    % calculate dt
-    dt = t(i+1)-t(i);
-   
+    % set dt using adaptive or predefined time stepping
+    if adaptivetime
+        % adaptive time stepping based on CFL condition
+        maxV = max(max(max(qx2)),max(max(qz2)));
+        if i==1
+            dt = 24*3600;
+        else
+            dt = min(0.05*d/maxV, 0.5*d^2/1e-6);
+        end
+        t(i+1)=t(i)+dt;
+    else
+        % use t vector for dt
+        dt = t(i+1)-t(i);
+    end
+
     % compute beta for temperature equation
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
         
@@ -109,11 +118,13 @@ for i = 1:nstep-1
     % and solve:
     T2 = Tstiff\RHS;
     T2 = reshape(T2,nz,nx);
-    T2(T2<0) = 0; %a kluge to prevent negative temperatures
+    T2(T2<0) = 0; % kluge to prevent negative temperatures
 
     % apply constant temperature constraint
     T2(Tconst)=T(Tconst);
-    
+
+    % apply other temperature source term?
+
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...
         rhobt,rhobb,rhobr,rhobl,qx2,qz2,kx,kz,mu2,g,T2,Pbt, ...
@@ -157,9 +168,12 @@ end
 
 %***Print timing info to screen***
 etime = toc;
-fprintf('\n\nTotal time              %f seconds\n',etime);
-fprintf('Number of model steps         %i steps\n',i);
-fprintf('Time per model step     %f seconds\n\n',etime/nstep);
+fprintf('\n\nTotal wall time\t\t\t%.1f seconds\n',etime);
+fprintf('Number of model steps\t\t%i steps\n',i);
+fprintf('Wall time per step\t\t%.2f seconds\n',etime/nstep);
+fprintf('Total model time\t\t%.1f years\n', tout(end)/60/60/24/365);
+fprintf('Average model time per step\t%.1f years\n', ...
+    mean(diff(tout(end-round(length(tout)/4):end)))/60/60/24/365);
 
 %save outputs to file
 save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout');

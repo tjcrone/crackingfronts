@@ -9,13 +9,19 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing05';
+infilename = 'testing08';
 
-% time stepping variables
-stepsize = 1e5; % step size in seconds
-runtime = 1e10; % total run time in seconds (3e9 is about 100 years)
-t = 0:stepsize:runtime-stepsize; % time vector built from stepsize and runtime
-nstep = length(t); % number of steps required in model run
+% time stepping 
+adaptivetime=1; % set to unity for adaptive time stepping
+if adaptivetime
+    nstep = 100; % number of steps to take with adaptive time stepping
+    t = zeros(1,nstep); % initialize t vector for adaptive time stepping
+else
+    stepsize = 1e5; % step size in seconds
+    runtime = 3e7; % total run time in seconds (3e9 is about 100 years)
+    t = 0:stepsize:runtime-stepsize; % create time vector built from stepsize and runtime
+    nstep = length(t); % number of steps required in model run
+end
 nout = nstep/10; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
@@ -49,7 +55,7 @@ T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
 T(13:end,7) = Thot;
 
-% define logical for regions where temperatures will remain constant
+% define logical for regions where temperatures will remain constant (effective heat source)
 Tconst = logical(T*0);
 Tconst(13:end,7) = 1;
 
@@ -100,7 +106,7 @@ if nameexist ~= -1
 end
 
 % save variables to an input .mat file
-save(fullinfilename,'stepsize','runtime','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
+save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','t','topconduction','Tconst','kimperm');
+   'alpham','rhobound','Pbound','topconduction','Tconst','kimperm');
 disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
