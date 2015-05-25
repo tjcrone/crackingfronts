@@ -9,12 +9,12 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing08';
+infilename = 'testing09';
 
 % time stepping 
 adaptivetime=1; % set to unity for adaptive time stepping
 if adaptivetime
-    nstep = 100; % number of steps to take with adaptive time stepping
+    nstep = 100000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -22,12 +22,12 @@ else
     t = 0:stepsize:runtime-stepsize; % create time vector built from stepsize and runtime
     nstep = length(t); % number of steps required in model run
 end
-nout = nstep/10; % number of steps to output (must be divisor of nstep)
+nout = nstep/100; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 25; % number of grid cells in x-direction (columns)
-nz = 25; % number of grid cells in z-direction (rows)
-d = 40; % grid cell size (uniform grid, meters)
+nx = 50; % number of grid cells in x-direction (columns)
+nz = 50; % number of grid cells in z-direction (rows)
+d = 20; % grid cell size (uniform grid, meters)
 
 % some constants
 rhom = 2950; % rock or grain density (basalt)
@@ -41,7 +41,7 @@ g = 9.8; % gravitational constant
 
 % define logical for impermeable regions
 kimperm = logical(kx*0);
-kimperm(13:end,7) = 1; 
+kimperm(26:end,14:15) = 1; 
 
 % initial temperature conditions
 Tcold = 0;
@@ -53,11 +53,11 @@ T = Z*(Thot-Tcold)/(nz*d)+Tcold;
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
-T(13:end,7) = Thot;
+T(26:end,14:15) = Thot;
 
 % define logical for regions where temperatures will remain constant (effective heat source)
 Tconst = logical(T*0);
-Tconst(13:end,7) = 1;
+Tconst(26:end,14:15) = 1;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
