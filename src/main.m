@@ -176,5 +176,5 @@ fprintf('Average model time per step\t%.1f years\n', ...
     mean(diff(tout(end-round(length(tout)/4):end)))/60/60/24/365);
 
 %save outputs to file
-save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout');
+save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout','-v7.3');
 fprintf('\nOutput file %s written.\n\n',[outfilename,'_fin.mat']);

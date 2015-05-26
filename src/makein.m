@@ -9,12 +9,20 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing09';
+infilename = 'testing11';
+
+% restart from output file
+% restarting requires the final temperature from a previous run, so the
+% domain geometry must be the same
+restart = 1; % set to unity to indicate that this is a restart
+if restart
+  restartfilename = 'testing10'; % fin file to restart from
+end
 
 % time stepping 
 adaptivetime=1; % set to unity for adaptive time stepping
 if adaptivetime
-    nstep = 100000; % number of steps to take with adaptive time stepping
+    nstep = 10000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -22,7 +30,7 @@ else
     t = 0:stepsize:runtime-stepsize; % create time vector built from stepsize and runtime
     nstep = length(t); % number of steps required in model run
 end
-nout = nstep/100; % number of steps to output (must be divisor of nstep)
+nout = nstep; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
 nx = 50; % number of grid cells in x-direction (columns)
@@ -54,6 +62,13 @@ T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
 T(26:end,14:15) = Thot;
+
+% restart off of a previous temperature condition
+if restart
+    fullrestartfilename = ['../in_out/',restartfilename,'_fin'];
+    restartfile = matfile(fullrestartfilename);
+    T = restartfile.Tout(:,:,end);
+end
 
 % define logical for regions where temperatures will remain constant (effective heat source)
 Tconst = logical(T*0);
@@ -108,5 +123,5 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','topconduction','Tconst','kimperm');
+   'alpham','rhobound','Pbound','topconduction','Tconst','kimperm','restart','-v7.3');
 disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
