@@ -22,7 +22,7 @@ end
 % time stepping 
 adaptivetime = 1; % set to unity for adaptive time stepping
 if adaptivetime==1
-    nstep = 10000; % number of steps to take with adaptive time stepping
+    nstep = 40000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -35,7 +35,7 @@ nout = nstep; % number of steps to output (must be divisor of nstep)
 % domain geometry
 nx = 60; % number of grid cells in x-direction (columns)
 nz = 60; % number of grid cells in z-direction (rows)
-d = 10; % grid cell size (uniform grid, meters)
+d = 5; % grid cell size (uniform grid, meters)
 
 % some constants
 rhom = 2950; % rock or grain density (basalt)

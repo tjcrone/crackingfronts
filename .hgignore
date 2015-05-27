@@ -1,3 +1,5 @@
 ^tmp$
-^in_out$
 ^misc$
+
+syntax: glob
+in_out/*.mat
