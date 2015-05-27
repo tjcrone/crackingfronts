@@ -9,14 +9,14 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing13';
+infilename = 'testing19';
 
 % restart from output file
 % restarting requires the final temperature from a previous run, so the
 % domain geometry must be the same
 restart = 0; % set to unity to indicate that this is a restart
 if restart
-  restartfilename = 'testing10'; % fin file to restart from
+  restartfilename = 'testing14'; % fin file to restart from
 end
 
 % time stepping 
@@ -33,8 +33,8 @@ end
 nout = nstep; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 50; % number of grid cells in x-direction (columns)
-nz = 50; % number of grid cells in z-direction (rows)
+nx = 30; % number of grid cells in x-direction (columns)
+nz = 30; % number of grid cells in z-direction (rows)
 d = 20; % grid cell size (uniform grid, meters)
 
 % some constants
@@ -46,12 +46,12 @@ phi = ones(nz,nx)*0.03; % porosity
 g = 9.8; % gravitational constant
 
 %initial permeability
-kon = 1e-12;
+kon = 1e-16;
 koff = 1e-32; 
 kx = ones(nz,nx)*kon;  % permeability in x-direction
 kz = ones(nz,nx)*kon;  % permeability in z-direction
-kx(26:end,14:15) = koff;
-kz(26:end,14:15) = koff;
+%kx(26:end,14:15) = koff;
+%kz(26:end,14:15) = koff;
 
 % define permeability function
 kfunc = 0; % set to unity if using a permeability function
@@ -59,15 +59,16 @@ kcall = '[kx,kz] = thermalcracking(nx,nz,Z,kon,koff,g,T1);';
 
 % initial temperature conditions
 Tcold = 0;
-Thot = 300;
+Thot = 350;
 x = linspace(d/2,(nx-1)*d,nx);
 z = linspace(d/2,(nz-1)*d,nz);
 [X,Z] = meshgrid(x,z);
-T = Z*(Thot-Tcold)/(nz*d)+Tcold;
+T = fliplr(X*(Thot-Tcold)/(nx*d)+Tcold);
+%T = Z*(Thot-Tcold)/(nz*d)+Tcold;
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
-T(26:end,14:15) = Thot;
+%T(26:end,14:15) = Thot;
 
 % restart off of a previous temperature condition
 if restart
@@ -78,15 +79,16 @@ end
 
 % define logical for regions where temperatures will remain constant (effective heat source)
 Tconst = logical(T*0);
-Tconst(26:end,14:15) = 1;
+%Tconst(26:end,14:15) = 1;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
 Tbt = [ones(1,nx)*Tcold; ones(1,nx)*1]; % Dirichlet cold
-Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
-%Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+%Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
+Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
-Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
+%Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
+Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % top boundary conduction
 % set this variable to unity to have the conduction across the top boundary
