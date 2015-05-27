@@ -53,6 +53,8 @@ Pout = zeros(nz,nx,nout);
 qxout = zeros(nz,nx+1,nout);
 qzout = zeros(nz+1,nx,nout);
 tout = zeros(1,nout);
+kxout = zeros(nz,nx,nout);
+kzout = zeros(nz,nx,nout);
 
 %***Store t=1 Outputs
 rhofout(:,:,1) = rhof1;
@@ -60,6 +62,8 @@ Tout(:,:,1) = T1;
 Pout(:,:,1) = P1;
 qxout(:,:,1) = qx1;
 qzout(:,:,1) = qz1;
+kxout(:,:,1) = kx;
+kzout(:,:,1) = kz;
 
 %create tentative values at t=2
 rhof2 = rhof1;
@@ -78,12 +82,12 @@ tic;
 for i = 1:nstep-1
 
     % apply permeability model 
-    if kfunc
-        eval(kfunc);
+    if kfunc==1
+        eval(kcall);
     end
     
     % set dt using adaptive or predefined time stepping
-    if adaptivetime
+    if adaptivetime==1
         % adaptive time stepping based on CFL condition
         maxV = max(max(max(qx2)),max(max(qz2)));
         if i==1
@@ -158,6 +162,8 @@ for i = 1:nstep-1
         Pout(:,:,i/(nstep/nout)+1) = P2;
         qxout(:,:,i/(nstep/nout)+1) = qx2;
         qzout(:,:,i/(nstep/nout)+1) = qz2;
+        kxout(:,:,i/(nstep/nout)+1) = kx;
+        kzout(:,:,i/(nstep/nout)+1) = kz;
         tout(i/(nstep/nout)+1) = t(i+1);
     end
     
@@ -175,5 +181,6 @@ fprintf('Average model time per step\t%.1f years\n', ...
     mean(diff(tout(end-round(length(tout)/4):end)))/60/60/24/365);
 
 %save outputs to file
-save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout','-v7.3');
+save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout', ...
+    'kxout','kzout','-v7.3');
 fprintf('\nOutput file %s written.\n\n',[outfilename,'_fin.mat']);

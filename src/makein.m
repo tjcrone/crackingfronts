@@ -9,12 +9,12 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing11';
+infilename = 'testing12';
 
 % restart from output file
 % restarting requires the final temperature from a previous run, so the
 % domain geometry must be the same
-restart = 1; % set to unity to indicate that this is a restart
+restart = 0; % set to unity to indicate that this is a restart
 if restart
   restartfilename = 'testing10'; % fin file to restart from
 end
@@ -33,8 +33,8 @@ end
 nout = nstep; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 50; % number of grid cells in x-direction (columns)
-nz = 50; % number of grid cells in z-direction (rows)
+nx = 20; % number of grid cells in x-direction (columns)
+nz = 40; % number of grid cells in z-direction (rows)
 d = 20; % grid cell size (uniform grid, meters)
 
 % some constants
@@ -50,16 +50,16 @@ kon = 1e-12;
 koff = 1e-32; 
 kx = ones(nz,nx)*kon;  % permeability in x-direction
 kz = ones(nz,nx)*kon;  % permeability in z-direction
-kx(26:end,14:15) = koff;
-kz(26:end,14:15) = koff;
+kx(21:end,:) = koff;
+kz(21:end,:) = koff;
 
 % define permeability function
 kfunc = 1; % set to unity if using a permeability function
-kcall = '[kx, kz] = thermalcracking(nx,nz,kon,koff,T1)';
+kcall = '[kx, kz] = thermalcracking(nx,nz,Z,kon,koff,g,T1);';
 
 % initial temperature conditions
 Tcold = 0;
-Thot = 300;
+Thot = 800;
 x = linspace(d/2,(nx-1)*d,nx);
 z = linspace(d/2,(nz-1)*d,nz);
 [X,Z] = meshgrid(x,z);
@@ -67,7 +67,7 @@ T = Z*(Thot-Tcold)/(nz*d)+Tcold;
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
-T(26:end,14:15) = Thot;
+T(21:end,:) = Thot;
 
 % restart off of a previous temperature condition
 if restart
@@ -78,7 +78,7 @@ end
 
 % define logical for regions where temperatures will remain constant (effective heat source)
 Tconst = logical(T*0);
-Tconst(26:end,14:15) = 1;
+%Tconst(26:end,14:15) = 1;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
@@ -130,5 +130,5 @@ end
 save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
    'alpham','rhobound','Pbound','topconduction','Tconst','restart','kfunc','kcall', ...
-   '-v7.3');
+   'kon','koff','X','Z','-v7.3');
 fprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']);

@@ -1,4 +1,4 @@
-function [kx,kz] = thermalcracking(nx,nz,kon,koff,T)
+function [kx,kz] = thermalcracking(nx,nz,Z,kon,koff,g,T)
 
 % some constants
 Apress = 0.0560;
@@ -9,7 +9,7 @@ Tve = 900;
 rhoR = 3000;
 
 % calculate cracked region
-KI = Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
+KI = Atemp*(Tve-T)-Apress*(Pw+rhoR*g*Z);
 crack = max(0,KI/KIc);
 
 % rebuild kx and kz based on crack
