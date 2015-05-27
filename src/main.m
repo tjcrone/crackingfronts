@@ -43,10 +43,6 @@ cfbb = interptim(PP,TT,CP,Pbound./100000,Tbb(1,:));
 cfbr = interptim(PP,TT,CP,P1(:,end)./100000,Tbr(:,1));
 cfbl = interptim(PP,TT,CP,P1(:,1)  ./100000,Tbl(:,1));
 
-% apply initial kimperm
-kx(kimperm) = 1e-32;
-kz(kimperm) = 1e-32;
-
 %compute darcy velocities (t=1)
 [qx1,qz1] = darcy(nx,nz,P1,rhof1,rhobb,kx,kz,mu1,g,d,Pbt,Pbb,Pbr,Pbl,T1);
 
@@ -82,6 +78,9 @@ tic;
 for i = 1:nstep-1
 
     % apply permeability model 
+    if kfunc
+        eval(kfunc);
+    end
     
     % set dt using adaptive or predefined time stepping
     if adaptivetime

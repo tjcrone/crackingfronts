@@ -20,8 +20,8 @@ if restart
 end
 
 % time stepping 
-adaptivetime=1; % set to unity for adaptive time stepping
-if adaptivetime
+adaptivetime = 1; % set to unity for adaptive time stepping
+if adaptivetime==1
     nstep = 10000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
@@ -43,13 +43,19 @@ cm = 1004; % rock heat capacity (basalt)
 lamdam = 2; % rock thermal conductivity (basalt)
 alpham = 2e-5; % rock thermal expansion coefficient (basalt)
 phi = ones(nz,nx)*0.03; % porosity
-kx = ones(nz,nx)*1e-12;  % permeability in x-direction
-kz = ones(nz,nx)*1e-12;  % permeability in z-direction
 g = 9.8; % gravitational constant
 
-% define logical for impermeable regions
-kimperm = logical(kx*0);
-kimperm(26:end,14:15) = 1; 
+%initial permeability
+kon = 1e-12;
+koff = 1e-32; 
+kx = ones(nz,nx)*kon;  % permeability in x-direction
+kz = ones(nz,nx)*kon;  % permeability in z-direction
+kx(26:end,14:15) = koff;
+kz(26:end,14:15) = koff;
+
+% define permeability function
+kfunc = 1; % set to unity if using a permeability function
+kcall = '[kx, kz] = thermalcracking(nx,nz,kon,koff,T1)';
 
 % initial temperature conditions
 Tcold = 0;
@@ -104,7 +110,7 @@ Pbr = [ones(nz,1).*0 ones(nz,1)*0]; % closed
 Pbl = [ones(nz,1).*0 ones(nz,1)*0]; % closed
 
 % error-check nout
-if mod(nstep,nout) ~= 0 | mod(nout,1) ~= 0
+if mod(nstep,nout) ~= 0 || mod(nout,1) ~= 0
    error('Sorry, nout is not a divisor of nstep, or is not an integer.  Input file not written.');
 end
 
@@ -114,7 +120,7 @@ nameexist = fopen([fullinfilename,'.mat'],'r+');
 if nameexist ~= -1
    sure = input(sprintf('\nAre you sure you want to overwrite the existing file, %s? (y/n) ', ...
       [infilename,'_in.mat']),'s');
-   if isempty(findstr(sure,'y')) | length(sure) ~= 1
+   if isempty(strfind(sure,'y')) || length(sure) ~= 1
       fclose(nameexist);
       error('Input file not written.');
    end
@@ -123,5 +129,6 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','topconduction','Tconst','kimperm','restart','-v7.3');
-disp(sprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']));
+   'alpham','rhobound','Pbound','topconduction','Tconst','restart','kfunc','kcall', ...
+   '-v7.3');
+fprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']);
