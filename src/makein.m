@@ -9,7 +9,7 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing19';
+infilename = 'testing20';
 
 % restart from output file
 % restarting requires the final temperature from a previous run, so the
@@ -33,9 +33,9 @@ end
 nout = nstep; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 30; % number of grid cells in x-direction (columns)
-nz = 30; % number of grid cells in z-direction (rows)
-d = 20; % grid cell size (uniform grid, meters)
+nx = 60; % number of grid cells in x-direction (columns)
+nz = 60; % number of grid cells in z-direction (rows)
+d = 10; % grid cell size (uniform grid, meters)
 
 % some constants
 rhom = 2950; % rock or grain density (basalt)
@@ -46,7 +46,7 @@ phi = ones(nz,nx)*0.03; % porosity
 g = 9.8; % gravitational constant
 
 %initial permeability
-kon = 1e-16;
+kon = 1e-12;
 koff = 1e-32; 
 kx = ones(nz,nx)*kon;  % permeability in x-direction
 kz = ones(nz,nx)*kon;  % permeability in z-direction
@@ -63,8 +63,8 @@ Thot = 350;
 x = linspace(d/2,(nx-1)*d,nx);
 z = linspace(d/2,(nz-1)*d,nz);
 [X,Z] = meshgrid(x,z);
-T = fliplr(X*(Thot-Tcold)/(nx*d)+Tcold);
-%T = Z*(Thot-Tcold)/(nz*d)+Tcold;
+T = fliplr(X*(Tcold-Thot)/(nx*d)+Thot); % horizontal gradient
+%T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
@@ -91,7 +91,7 @@ Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % top boundary conduction
-% set this variable to unity to have the conduction across the top boundary
+% set this variable to unity to have conduction across the top boundary
 topconduction = 0;
 
 % load or globalize thermodynamic tables
