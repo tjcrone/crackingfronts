@@ -9,7 +9,7 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing20';
+infilename = 'testing21';
 
 % restart from output file
 % restarting requires the final temperature from a previous run, so the
@@ -22,7 +22,7 @@ end
 % time stepping 
 adaptivetime = 1; % set to unity for adaptive time stepping
 if adaptivetime==1
-    nstep = 40000; % number of steps to take with adaptive time stepping
+    nstep = 10000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -33,8 +33,8 @@ end
 nout = nstep; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 60; % number of grid cells in x-direction (columns)
-nz = 60; % number of grid cells in z-direction (rows)
+nx = 25; % number of grid cells in x-direction (columns)
+nz = 25; % number of grid cells in z-direction (rows)
 d = 5; % grid cell size (uniform grid, meters)
 
 % some constants
@@ -63,7 +63,7 @@ Thot = 350;
 x = linspace(d/2,(nx-1)*d,nx);
 z = linspace(d/2,(nz-1)*d,nz);
 [X,Z] = meshgrid(x,z);
-T = fliplr(X*(Tcold-Thot)/(nx*d)+Thot); % horizontal gradient
+T = X*(Tcold-Thot)/(nx*d)+Thot; % horizontal gradient
 %T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot

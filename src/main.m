@@ -88,8 +88,10 @@ for i = 1:nstep-1
         maxV = max(max(max(qx2)),max(max(qz2)));
         if i==1
             dt = 24*3600;
+        elseif i<100
+            dt = min(0.001*d/maxV, 0.5*d^2/1e-6);
         else
-            dt = min(0.05*d/maxV, 0.5*d^2/1e-6);
+            dt = min(0.01*d/maxV, 0.5*d^2/1e-6);
         end
         t(i+1)=t(i)+dt;
     else
