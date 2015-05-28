@@ -170,11 +170,15 @@ end
 %***Print timing info to screen***
 etime = toc;
 fprintf('\n\nTotal wall time\t\t\t%.1f seconds\n',etime);
-fprintf('Number of model steps\t\t%i steps\n',i);
+fprintf('Number of model steps\t\t%i steps\n',i+1);
 fprintf('Wall time per step\t\t%.2f seconds\n',etime/nstep);
 fprintf('Total model time\t\t%.1f years\n', tout(end)/60/60/24/365);
-fprintf('Average model time per step\t%.2f years\n', ...
-    mean(diff(tout(end-round(length(tout)/4):end)))/60/60/24/365);
+daysperstep = mean(diff(tout(end-round(length(tout)/4):end)))/60/60/24;
+if daysperstep>365
+    fprintf('Average model time per step\t%.2f years\n',daysperstep/365);
+else
+    fprintf('Average model time per step\t%.1f days\n',daysperstep);
+end
 
 %save outputs to file
 save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout','-v7.3');
