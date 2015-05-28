@@ -9,7 +9,7 @@ function [] = makein()
 % Timothy Crone (tjcrone@gmail.com)
 
 % infile name
-infilename = 'testing21';
+infilename = 'testing22';
 
 % restart from output file
 % restarting requires the final temperature from a previous run, so the
@@ -50,8 +50,8 @@ kon = 1e-12;
 koff = 1e-32; 
 kx = ones(nz,nx)*kon;  % permeability in x-direction
 kz = ones(nz,nx)*kon;  % permeability in z-direction
-%kx(26:end,14:15) = koff;
-%kz(26:end,14:15) = koff;
+kx(10:end,6) = koff;
+kz(10:end,6) = koff;
 
 % define permeability function
 kfunc = 0; % set to unity if using a permeability function
@@ -68,7 +68,7 @@ T = X*(Tcold-Thot)/(nx*d)+Thot; % horizontal gradient
 T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
-%T(26:end,14:15) = Thot;
+T(10:end,6) = Thot;
 
 % restart off of a previous temperature condition
 if restart
@@ -79,7 +79,7 @@ end
 
 % define logical for regions where temperatures will remain constant (effective heat source)
 Tconst = logical(T*0);
-%Tconst(26:end,14:15) = 1;
+Tconst(10:end,6) = 1;
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
@@ -87,8 +87,8 @@ Tbt = [ones(1,nx)*Tcold; ones(1,nx)*1]; % Dirichlet cold
 %Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
 Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
-%Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
-Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
+Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
+%Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % top boundary conduction
 % set this variable to unity to have conduction across the top boundary
