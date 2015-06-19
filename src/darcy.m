@@ -9,7 +9,7 @@ function [qx,qz] = darcy(nx,nz,P,rhof,rhobb,kx,kz,mu,g,d,Pbt,Pbb,Pbr,Pbl,T);
 %load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
-   load('../Hydro/hydrotab7.mat');
+   load('../hydrotables/hydrotab7.mat');
 end
 
 % compute interface viscosities from mu
