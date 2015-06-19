@@ -9,7 +9,7 @@ function [B,D] = tadvectcoeff(nx,nz,d,qx,qz,rhof,cf, ...
 
 %build the thermodynamic coefficient beta and alpha
 %beta = rhos.*cs.*(1-phi) + rhof.*cf.*phi; %beta as defined on p. 402
-%tau = pec_calctau(T,phi,rhof,cf,rhos,cs,drhodT2,dcfdT2);
+%tau = calctau(T,phi,rhof,cf,rhos,cs,drhodT2,dcfdT2);
 alpha = rhof.*cf;
 
 %build logical masks

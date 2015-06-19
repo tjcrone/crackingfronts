@@ -19,16 +19,16 @@ end
 [kxx,dummy] = interfacemean(kx);
 [dummy,kzz] = interfacemean(kz);
 
-%Compute the internal interface darcy velocities
+% compute the internal interface darcy velocities
 qx = -kxx(:,2:end-1)./mux(:,2:end-1) .* (P(:,2:end) - P(:,1:end-1)) ./ d;
 qz = -kzz(2:end-1,:)./muz(2:end-1,:) .* ((P(2:end,:) - P(1:end-1,:))./d - g/2*(rhof(2:end,:)+rhof(1:end-1,:)));
 
-%Pad qx and qz with dummy values to accept boundary velocities
+% pad qx and qz with dummy values to accept boundary velocities
 qx = [zeros(nz,1) qx zeros(nz,1)];
 qz = [zeros(1,nx);qz;zeros(1,nx)];
 
-% Compute the boundary face darcy velocities using the boundary conditons
-% Right Side:
+% compute the boundary face darcy velocities using the boundary conditons
+% right Side:
 nloc = find(Pbr(:,2)==0); %neumann boundary condition locations
 dloc = find(Pbr(:,2)==1); %dirichlet boundary condition locations
 floc = find(Pbr(:,2)==2); %flux boundary conditions
@@ -36,7 +36,7 @@ qx(nloc,end) = -kxx(nloc,end)./mux(nloc,end) .* (Pbr(nloc,1));
 qx(dloc,end) = -kxx(dloc,end)./mux(dloc,end) .* (Pbr(dloc,1)-P(dloc,end))./(d/2);
 qx(floc,end) = Pbr(floc,1);
 
-% Left Side:
+% left Side:
 nloc = find(Pbl(:,2)==0); %neumann boundary condition locations
 dloc = find(Pbl(:,2)==1); %dirichlet boundary condition locations
 floc = find(Pbl(:,2)==2); %flux boundary conditions
@@ -44,7 +44,7 @@ qx(nloc,1) = -kxx(nloc,1)./mux(nloc,1) .* (Pbl(nloc,1));
 qx(dloc,1) = -kxx(dloc,1)./mux(dloc,1) .* (P(dloc,1) - Pbl(dloc,1))./(d/2);
 qx(floc,1) = Pbl(floc,1);
 
-% Top:
+% top:
 nloc = find(Pbt(2,:)==0); %neumann boundary condition locations
 dloc = find(Pbt(2,:)==1); %dirichlet boundary condition locations
 floc = find(Pbt(2,:)==2); %flux boundary conditions
@@ -55,7 +55,7 @@ qz(1,dloc) = -kzz(1,dloc)./muz(1,dloc) .* ((P(1,dloc) - Pbt(1,dloc))./(d/2) - g*
 %qz(1,dloc) = -kzz(1,dloc)./muz(1,dloc) .* ((P(1,dloc) - Pbt(1,dloc))./(d/2) - g*rhof(1,dloc));
 qz(1,floc) = Pbt(1,floc);
 
-% Bottom:
+% bottom:
 nloc = find(Pbb(2,:)==0); %neumann boundary condition locations
 dloc = find(Pbb(2,:)==1); %dirichlet boundary condition locations
 floc = find(Pbb(2,:)==2); %flux boundary conditions

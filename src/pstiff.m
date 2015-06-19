@@ -5,8 +5,6 @@ function [A,B,C] = pstiff(nx,nz,d,Se,rhof,rhobt,rhobb,rhobr, ...
 %this formulation assumes no flow side boundaries, dirichlet top
 %boundary and neumann bottom boundary.  this is fixed for now!
 
-%this is my CVS test
-
 %load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
