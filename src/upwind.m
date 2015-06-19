@@ -1,4 +1,4 @@
-function [N,S,E,W] = upwind(X,Xbt,Xbb,Xbr,Xbl,qx,qz);
+function [N,S,E,W] = upwind(X,Xbt,Xbb,Xbr,Xbl,qx,qz)
 %this function computes the upwind values for the property X
 %for use in upwind finite difference schemes that need upwind
 %values of certain properties. X is the property needed, while

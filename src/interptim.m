@@ -1,4 +1,4 @@
-function [z] = interptim(xi,yi,zi,x,y);
+function [z] = interptim(xi,yi,zi,x,y)
 % This function replaces interp2 for faster linear interpolations
 % This is a very dumb function use carefully.
 
