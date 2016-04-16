@@ -122,6 +122,7 @@ for i = 1:nstep-1
     T2 = Tstiff\RHS;
     T2 = reshape(T2,nz,nx);
     T2(T2<0) = 0; % kluge to prevent negative temperatures
+    T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
     % apply constant temperature constraint
     T2(Tconst)=T(Tconst);
