@@ -5,7 +5,7 @@ function [] = main(inputfile)
 %
 % Timothy Crone (tjcrone@gmail.com)
 
-% load input file (no path, no extension)
+% load input file
 load(['../in_out/',inputfile]);
 
 % build outfile name
@@ -79,9 +79,14 @@ tic;
 % time loop
 for i = 1:nstep-1
 
-    % apply permeability model 
-    if kfunc==1
-        eval(kcall);
+    % reset permeability if steady, else crack
+    if steady==1
+      kx = ones(nz,nx)*kon;  % permeability in x-direction
+      kz = ones(nz,nx)*kon;  % permeability in z-direction
+      kx(Z>zreset)=1e-32;
+      kz(Z>zreset)=1e-32;
+    else
+      eval(kcall);
     end
     
     % set dt using adaptive or predefined time stepping
@@ -124,10 +129,11 @@ for i = 1:nstep-1
     T2(T2<0) = 0; % kluge to prevent negative temperatures
     T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
-    % apply constant temperature constraint
-    T2(Tconst)=T(Tconst);
 
-    % apply other temperature source term?
+    % reset temperature if steady
+    if steady==1
+      T2(Z>zreset)=Thot;
+    end
 
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...
