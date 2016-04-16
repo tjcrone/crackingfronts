@@ -23,17 +23,17 @@ if isempty(TT)
     load('../hydrotables/hydrotab7.mat');
 end
 
-%add step signifier to some variables
+% add step signifier to some variables
 T1 = T;
 P1 = P;
 
-%compute T-P dependent fluid properties (t=1)
+% compute T-P dependent fluid properties (t=1)
 mu1 = dynvisc(T1); %fluid viscosity
 rhof1 = interptim(PP,TT,RHO,P1./100000,T1); %fluid density
 cf1 = interptim(PP,TT,CP,P1./100000,T1); %fluid heat capacity
 Se1 = T1*0+1;
 
-%compute boundary fluid properties
+% compute boundary fluid properties
 rhobt = interptim(PP,TT,RHO,Tbt(1,:)*0+Ptop./100000,Tbt(1,:));
 rhobb = rhobound;
 rhobr = interptim(PP,TT,RHO,P1(:,end)./100000,Tbr(:,1));
@@ -43,25 +43,27 @@ cfbb = interptim(PP,TT,CP,Pbound./100000,Tbb(1,:));
 cfbr = interptim(PP,TT,CP,P1(:,end)./100000,Tbr(:,1));
 cfbl = interptim(PP,TT,CP,P1(:,1)  ./100000,Tbl(:,1));
 
-%compute darcy velocities (t=1)
+% compute darcy velocities (t=1)
 [qx1,qz1] = darcy(nx,nz,P1,rhof1,rhobb,kx,kz,mu1,g,d,Pbt,Pbb,Pbr,Pbl,T1);
 
-%***Initialize Output Data Storage Locations***
+% initialize output
 rhofout = zeros(nz,nx,nout);
+cfout = zeros(nz,nx,nout);
 Tout = zeros(nz,nx,nout);
 Pout = zeros(nz,nx,nout);
 qxout = zeros(nz,nx+1,nout);
 qzout = zeros(nz+1,nx,nout);
 tout = zeros(1,nout);
 
-%***Store t=1 Outputs
+% store t=1 output
 rhofout(:,:,1) = rhof1;
+cfout(:,:,1) = cf1;
 Tout(:,:,1) = T1;
 Pout(:,:,1) = P1;
 qxout(:,:,1) = qx1;
 qzout(:,:,1) = qz1;
 
-%create tentative values at t=2
+% create tentative values at t=2
 rhof2 = rhof1;
 cf2 = cf1;
 qx2 = qx1;
@@ -74,7 +76,7 @@ T2 = T1;
 % start timer
 tic;
 
-%time loop
+% time loop
 for i = 1:nstep-1
 
     % apply permeability model 
@@ -153,9 +155,10 @@ for i = 1:nstep-1
     P1 = P2;
     T1 = T2;   
     
-    % Store outputs
+    % store outputs
     if mod(i,nstep/nout) == 0;
         rhofout(:,:,i/(nstep/nout)+1) = rhof2;
+        cfout(:,:,i/(nstep/nout)+1) = cf2;
         Tout(:,:,i/(nstep/nout)+1) = T2;
         Pout(:,:,i/(nstep/nout)+1) = P2;
         qxout(:,:,i/(nstep/nout)+1) = qx2;
@@ -163,11 +166,11 @@ for i = 1:nstep-1
         tout(i/(nstep/nout)+1) = t(i+1);
     end
     
-    %Update progress bar
+    % update progress bar
     progressbar(i,nstep-1,mfilename, 'working ...');
 end
 
-%***Print timing info to screen***
+% print timing info
 etime = toc;
 fprintf('\n\nTotal wall time\t\t\t%.1f seconds\n',etime);
 fprintf('Number of model steps\t\t%i steps\n',i+1);
@@ -180,6 +183,6 @@ else
     fprintf('Average model time per step\t%.1f days\n',daysperstep);
 end
 
-%save outputs to file
-save(fulloutfilename,'rhofout','Tout','Pout','qxout','qzout','tout','-v7.3');
+% save outputs to file
+save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','-v7.3');
 fprintf('\nOutput file %s written.\n\n',[outfilename,'_fin.mat']);
