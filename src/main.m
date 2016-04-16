@@ -1,20 +1,24 @@
-function [] = main(inputfile)
+function [] = main(inputfile, steadyfile)
 % This is the main poroelastic convection model function.  It loads the
 % input variables specified by INPUTFILE, then commences a convection run
-% saving the outputs to a file with the same prefix as the input file.
+% saving the outputs to a file with the same prefix as the input file. If
+% STEADYFILE is included, it starts a cracking run. If not, it starts a
+% steady state run.
 %
 % Timothy Crone (tjcrone@gmail.com)
 
 % load input file
 load(['../in_out/',inputfile]);
 
-% build outfile name
-outfilename = inputfile(1:strfind(inputfile,'_')-1);
-fulloutfilename = ['../in_out/',outfilename,'_fin'];
-
-% add .mat for windows
-if isempty(strfind(evalc('!uname'),'Linux'))
-    fulloutfilename = [fulloutfilename,'.mat'];
+% load steady file if necessary and set output file extension
+steady=1;
+ext='sdy';
+if exist('steadyfile', 'var')
+  if ~isempty(steadyfile)
+    load(['../in_out/',steadyfile], 'Tout');
+    T = Tout(:,:,end);
+    ext='fin';
+    steady=0;
 end
 
 % globalize thermodynamic tables
@@ -191,5 +195,7 @@ else
 end
 
 % save outputs to file
+outfilename = inputfile(1:strfind(inputfile,'_')-1);
+fulloutfilename = ['../in_out/',outfilename,'_',ext];
 save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','-v7.3');
-fprintf('\nOutput file %s written.\n\n',[outfilename,'_fin.mat']);
+fprintf('\nOutput file %s written.\n\n',[outfilename,'_',ext,'.mat']);
