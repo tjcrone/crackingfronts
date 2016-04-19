@@ -1,24 +1,21 @@
-function [] = main(inputfile, steadyfile)
+function [] = main(inputfile, finfile)
 % This is the main poroelastic convection model function.  It loads the
 % input variables specified by INPUTFILE, then commences a convection run
 % saving the outputs to a file with the same prefix as the input file. If
-% STEADYFILE is included, it starts a cracking run. If not, it starts a
-% steady state run.
+% FINFILE is included, a restart is assumed and the final temperature from
+% FINFILE is loaded as the starting temperature field.
 %
 % Timothy Crone (tjcrone@gmail.com)
 
 % load input file
-load(['../in_out/',inputfile]);
+load(['../in_out/',inputfile,'_in.mat']);
 
-% load steady file if necessary and set output file extension
-steady=1;
-ext='sdy';
-if exist('steadyfile', 'var')
-  if ~isempty(steadyfile)
-    load(['../in_out/',steadyfile], 'Tout');
+% load finfile if required
+if exist('finfile', 'var')
+  if ~isempty(finfile)
+    load(['../in_out/',finfile], 'Tout');
     T = Tout(:,:,end);
-    ext='fin';
-    steady=0;
+  end
 end
 
 % globalize thermodynamic tables
@@ -55,6 +52,7 @@ rhofout = zeros(nz,nx,nout);
 cfout = zeros(nz,nx,nout);
 Tout = zeros(nz,nx,nout);
 Pout = zeros(nz,nx,nout);
+kxout = zeros(nz,nx,nout);
 qxout = zeros(nz,nx+1,nout);
 qzout = zeros(nz+1,nx,nout);
 tout = zeros(1,nout);
@@ -66,6 +64,7 @@ Tout(:,:,1) = T1;
 Pout(:,:,1) = P1;
 qxout(:,:,1) = qx1;
 qzout(:,:,1) = qz1;
+kxout(:,:,1) = kx;
 
 % create tentative values at t=2
 rhof2 = rhof1;
@@ -83,14 +82,15 @@ tic;
 % time loop
 for i = 1:nstep-1
 
-    % reset permeability if steady, else crack
+    % reset permeability if steady, otherwise do some cracking
     if steady==1
       kx = ones(nz,nx)*kon;  % permeability in x-direction
       kz = ones(nz,nx)*kon;  % permeability in z-direction
       kx(Z>zreset)=1e-32;
       kz(Z>zreset)=1e-32;
     else
-      eval(kcall);
+      disp('asdf');
+      %eval(kcall);
     end
     
     % set dt using adaptive or predefined time stepping
@@ -133,7 +133,6 @@ for i = 1:nstep-1
     T2(T2<0) = 0; % kluge to prevent negative temperatures
     T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
-
     % reset temperature if steady
     if steady==1
       T2(Z>zreset)=Thot;
@@ -174,6 +173,7 @@ for i = 1:nstep-1
         Pout(:,:,i/(nstep/nout)+1) = P2;
         qxout(:,:,i/(nstep/nout)+1) = qx2;
         qzout(:,:,i/(nstep/nout)+1) = qz2;
+        kxout(:,:,i/(nstep/nout)+1) = kx;
         tout(i/(nstep/nout)+1) = t(i+1);
     end
     
@@ -196,6 +196,7 @@ end
 
 % save outputs to file
 outfilename = inputfile(1:strfind(inputfile,'_')-1);
-fulloutfilename = ['../in_out/',outfilename,'_',ext];
-save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','-v7.3');
-fprintf('\nOutput file %s written.\n\n',[outfilename,'_',ext,'.mat']);
+fulloutfilename = ['../in_out/',outfilename,'_fin.mat'];
+save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','kxout','-v7.3');
+fprintf('\nOutput file %s written.\n\n',fulloutfilename);
+

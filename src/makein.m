@@ -3,26 +3,21 @@ function [] = makein()
 % The .mat file produced will contain all the needed variables to begin
 % a new porous convection run. All units are SI, unless otherwise
 % specified. This function does not use a previously computed T-P field,
-% so computes a hydrostatic initial pressure field from the temperature
+% so calculates a hydrostatic initial pressure field from the temperature
 % field.
 %
 % Timothy Crone (tjcrone@gmail.com)
 
-% infile name
-infilename = 'testing22';
+% set steady flag if this is going to be a steady state run
+steady=1;
 
-% restart from output file
-% restarting requires the final temperature from a previous run, so the
-% domain geometry must be the same
-restart = 0; % set to unity to indicate that this is a restart
-if restart
-  restartfilename = 'testing14'; % fin file to restart from
-end
+% filename prefix
+fileprefix = 'n01';
 
 % time stepping 
 adaptivetime = 1; % set to unity for adaptive time stepping
 if adaptivetime==1
-    nstep = 10000; % number of steps to take with adaptive time stepping
+    nstep = 20000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -33,9 +28,9 @@ end
 nout = nstep; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 25; % number of grid cells in x-direction (columns)
-nz = 25; % number of grid cells in z-direction (rows)
-d = 5; % grid cell size (uniform grid, meters)
+nx = 20; % number of grid cells in x-direction (columns)
+nz = 50; % number of grid cells in z-direction (rows)
+d = 100; % grid cell size (uniform grid, meters)
 
 % some constants
 rhom = 2950; % rock or grain density (basalt)
@@ -45,47 +40,41 @@ alpham = 2e-5; % rock thermal expansion coefficient (basalt)
 phi = ones(nz,nx)*0.03; % porosity
 g = 9.8; % gravitational constant
 
-%initial permeability
-kon = 1e-12;
-koff = 1e-32; 
-kx = ones(nz,nx)*kon;  % permeability in x-direction
-kz = ones(nz,nx)*kon;  % permeability in z-direction
-kx(10:end,6) = koff;
-kz(10:end,6) = koff;
-
-% define permeability function
-kfunc = 0; % set to unity if using a permeability function
-kcall = '[kx,kz] = thermalcracking(nx,nz,Z,kon,koff,g,T1);';
-
 % initial temperature conditions
 Tcold = 0;
 Thot = 350;
+Tcut = 500;
+zreset = 1000;
 x = linspace(d/2,(nx-1)*d,nx);
 z = linspace(d/2,(nz-1)*d,nz);
-[X,Z] = meshgrid(x,z);
-T = X*(Tcold-Thot)/(nx*d)+Thot; % horizontal gradient
-%T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
-T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
+[~,Z] = meshgrid(x,z);
+T = Z*(Tcut-Tcold)/(zreset)+Tcold;
+T(T>Tcut)=Tcut;
+T(Z>zreset)=Thot;
 T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
-T(10:end,6) = Thot;
+%T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
+%T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 
-% restart off of a previous temperature condition
-if restart
-    fullrestartfilename = ['../in_out/',restartfilename,'_fin'];
-    restartfile = matfile(fullrestartfilename);
-    T = restartfile.Tout(:,:,end);
-end
+%initial permeability
+kon = 1e-14;
+koff = 1e-32; 
+kx = ones(nz,nx)*kon;  % permeability in x-direction
+kz = ones(nz,nx)*kon;  % permeability in z-direction
+kx(T>Tcut) = koff;
+kz(T>Tcut) = koff;
 
-% define logical for regions where temperatures will remain constant (effective heat source)
-Tconst = logical(T*0);
-Tconst(10:end,6) = 1;
+% define permeability function
+%kfunc = 0; % set to unity if using a permeability function
+%kcall = '[kx,kz] = thermalcracking(nx,nz,Z,kon,koff,g,T1);';
+
+
 
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
 Tbt = [ones(1,nx)*Tcold; ones(1,nx)*1]; % Dirichlet cold
-%Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
-Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
+%Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 %Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
@@ -116,8 +105,15 @@ if mod(nstep,nout) ~= 0 || mod(nout,1) ~= 0
    error('Sorry, nout is not a divisor of nstep, or is not an integer.  Input file not written.');
 end
 
+% set infilename based on steady
+if steady==1
+  infilename = [fileprefix,'_in_steady'];
+else
+  infilename = [fileprefix,'_in_cracky'];
+end
+
 % define full infile name and check to see if it already exists
-fullinfilename = ['../in_out/',infilename,'_in'];
+fullinfilename = ['../in_out/',infilename];
 nameexist = fopen([fullinfilename,'.mat'],'r+');
 if nameexist ~= -1
    sure = input(sprintf('\nAre you sure you want to overwrite the existing file, %s? (y/n) ', ...
@@ -131,6 +127,6 @@ end
 % save variables to an input .mat file
 save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','topconduction','Tconst','restart','kfunc','kcall', ...
-   'kon','koff','X','Z','-v7.3');
+   'alpham','rhobound','Pbound','topconduction','zreset','Thot', ...
+   'kon','koff','Z','steady', '-v7.3');
 fprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']);
