@@ -1,5 +1,0 @@
-^tmp$
-^misc$
-
-syntax: glob
-in_out/*.mat
