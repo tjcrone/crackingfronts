@@ -8,16 +8,17 @@ function [] = makein()
 %
 % Timothy Crone (tjcrone@gmail.com)
 
+% read 
 % set steady flag if this is going to be a steady state run
 steady=1;
 
 % filename prefix
-fileprefix = 'n01';
+fileprefix = 'n08';
 
 % time stepping 
 adaptivetime = 1; % set to unity for adaptive time stepping
 if adaptivetime==1
-    nstep = 20000; % number of steps to take with adaptive time stepping
+    nstep = 80000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -25,7 +26,7 @@ else
     t = 0:stepsize:runtime-stepsize; % create time vector built from stepsize and runtime
     nstep = length(t); % number of steps required in model run
 end
-nout = nstep; % number of steps to output (must be divisor of nstep)
+nout = nstep/20; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
 nx = 20; % number of grid cells in x-direction (columns)
@@ -42,8 +43,8 @@ g = 9.8; % gravitational constant
 
 % initial temperature conditions
 Tcold = 0;
-Thot = 350;
-Tcut = 500;
+Thot = 600;
+Tcut = 400;
 zreset = 1000;
 x = linspace(d/2,(nx-1)*d,nx);
 z = linspace(d/2,(nz-1)*d,nz);
@@ -55,33 +56,33 @@ T(T>Thot) = Thot; % make sure no values are above Thot
 T(T<Tcold) = Tcold; % make sure no values are below Tcold
 %T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
 %T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
+T = Z*0+Tcold;
+T(Z>zreset)=Thot;
 
 %initial permeability
-kon = 1e-14;
+kon = 3e-15;
 koff = 1e-32; 
 kx = ones(nz,nx)*kon;  % permeability in x-direction
 kz = ones(nz,nx)*kon;  % permeability in z-direction
-kx(T>Tcut) = koff;
-kz(T>Tcut) = koff;
+kx(Z>zreset) = koff;
+kz(Z>zreset) = koff;
 
 % define permeability function
 %kfunc = 0; % set to unity if using a permeability function
 %kcall = '[kx,kz] = thermalcracking(nx,nz,Z,kon,koff,g,T1);';
 
-
-
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
 Tbt = [ones(1,nx)*Tcold; ones(1,nx)*1]; % Dirichlet cold
-Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
-%Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+%Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
+Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 %Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % top boundary conduction
 % set this variable to unity to have conduction across the top boundary
-topconduction = 0;
+topconduction = 1;
 
 % load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
@@ -107,17 +108,16 @@ end
 
 % set infilename based on steady
 if steady==1
-  infilename = [fileprefix,'_in_steady'];
+  infilename = [fileprefix,'_steady_in.mat'];
 else
-  infilename = [fileprefix,'_in_cracky'];
+  infilename = [fileprefix,'_cracky_in.mat'];
 end
 
 % define full infile name and check to see if it already exists
 fullinfilename = ['../in_out/',infilename];
-nameexist = fopen([fullinfilename,'.mat'],'r+');
+nameexist = fopen(fullinfilename, 'r+');
 if nameexist ~= -1
-   sure = input(sprintf('\nAre you sure you want to overwrite the existing file, %s? (y/n) ', ...
-      [infilename,'_in.mat']),'s');
+   sure = input(sprintf('\nAre you sure you want to overwrite the existing file, %s? (y/n) ', fullinfilename),'s');
    if isempty(strfind(sure,'y')) || length(sure) ~= 1
       fclose(nameexist);
       error('Input file not written.');
@@ -129,4 +129,4 @@ save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
    'alpham','rhobound','Pbound','topconduction','zreset','Thot', ...
    'kon','koff','Z','steady', '-v7.3');
-fprintf('\nInput file %s written.\n\n',[infilename,'_in.mat']);
+fprintf('\nInput file %s written.\n\n',fullinfilename);

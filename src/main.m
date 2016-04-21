@@ -8,12 +8,12 @@ function [] = main(inputfile, finfile)
 % Timothy Crone (tjcrone@gmail.com)
 
 % load input file
-load(['../in_out/',inputfile,'_in.mat']);
+load(['../in_out/',inputfile,'.mat']);
 
 % load finfile if required
 if exist('finfile', 'var')
   if ~isempty(finfile)
-    load(['../in_out/',finfile], 'Tout');
+    load(['../in_out/',finfile, '.mat'], 'Tout');
     T = Tout(:,:,end);
   end
 end
@@ -89,8 +89,22 @@ for i = 1:nstep-1
       kx(Z>zreset)=1e-32;
       kz(Z>zreset)=1e-32;
     else
-      disp('asdf');
-      %eval(kcall);
+
+      Apress=0.028;
+      Atemp=4962.3; 
+      KIc=1e6;
+      Pw=200e5;
+      Tve=900;
+      rhoR=2900;
+
+      KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
+      crack=max(0,KI/KIc);
+
+      kx = ones(nz,nx)*kon;  % permeability in x-direction
+      kz = ones(nz,nx)*kon;  % permeability in z-direction
+
+      kx(crack<1)=1e-32;
+      kz(crack<1)=1e-32;
     end
     
     % set dt using adaptive or predefined time stepping
@@ -195,7 +209,8 @@ else
 end
 
 % save outputs to file
-outfilename = inputfile(1:strfind(inputfile,'_')-1);
+underloc = strfind(inputfile, '_');
+outfilename = inputfile(1:underloc(end)-1);
 fulloutfilename = ['../in_out/',outfilename,'_fin.mat'];
 save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','kxout','-v7.3');
 fprintf('\nOutput file %s written.\n\n',fulloutfilename);
