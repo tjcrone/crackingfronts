@@ -22,7 +22,12 @@ else
     t = 0:stepsize:runtime-stepsize; % create time vector built from stepsize and runtime
     nstep = length(t); % number of steps required in model run
 end
-nout = nstep/20; % number of steps to output (must be divisor of nstep)
+nout = nstep/outputinterval; % number of steps to output (must be divisor of nstep)
+
+% check nout
+if mod(nstep,nout) ~= 0 || mod(nout,1) ~= 0
+   error('Output step number is not an integer. Check nstep and outputinterval.');
+end
 
 % domain geometry
 %nx = 20; % number of grid cells in x-direction (columns)
@@ -41,26 +46,19 @@ phi = ones(nz,nx)*0.03; % porosity
 g = 9.8; % gravitational constant
 
 % initial temperature conditions
-%Tcold = 0;
-%Thot = 600;
-%Tcut = 400;
-%zreset = 1000;
-%T = Z*(Tcut-Tcold)/(zreset)+Tcold;
-%T(T>Tcut)=Tcut;
-%T(Z>zreset)=Thot;
-%T(T>Thot) = Thot; % make sure no values are above Thot
-%T(T<Tcold) = Tcold; % make sure no values are below Tcold
-%T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
-%T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T = Z*0+Tcold;
 T(Z>zreset)=Thot;
 
-% do restart stuff here
-% if restart, load the T. if not, set the initial temperature conditions
-
-
-
-
+% restarted temperature field
+if restart==1
+  load(restartfile);
+  Tres = Tout(:,:,end);
+  [m, n] = size(Tres);
+  if n~=nx
+    error('Restarted temperature field must have the same number of columns.');
+  end
+  T(1:m,:) = Tres;
+end
 
 %initial permeability
 %kon = 3e-15;
@@ -103,11 +101,6 @@ Pbt = [ones(1,nx).*Ptop;ones(1,nx)*1]; % open
 Pbb = [ones(1,nx).*0;ones(1,nx)*0]; % closed
 Pbr = [ones(nz,1).*0 ones(nz,1)*0]; % closed
 Pbl = [ones(nz,1).*0 ones(nz,1)*0]; % closed
-
-% error-check nout
-if mod(nstep,nout) ~= 0 || mod(nout,1) ~= 0
-   error('Sorry, nout is not a divisor of nstep, or is not an integer.  Input file not written.');
-end
 
 % save the output to a temporary file
 inoutdir = '~/research/crackingfronts/in_out/';

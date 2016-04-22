@@ -213,8 +213,7 @@ end
 
 % save outputs to file
 underloc = strfind(inputfile, '_');
-outfilename = inputfile(1:underloc(end)-1);
-fulloutfilename = ['../in_out/',outfilename,'_out.mat'];
-save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','kxout','-v7.3');
-fprintf('\nOutput file %s written.\n\n',fulloutfilename);
+outfilename = [inputfile(1:underloc(end)-1), '_out.mat'];
+save(outfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','kxout','-v7.3');
+fprintf('\nOutput file %s written.\n\n',outfilename);
 
