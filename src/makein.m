@@ -49,7 +49,7 @@ g = 9.8; % gravitational constant
 T = Z*0+Tcold;
 T(Z>zreset)=Thot;
 
-% restarted temperature field
+% restart temperature field if required
 if restart==1
   load(restartfile);
   Tres = Tout(:,:,end);
@@ -75,15 +75,18 @@ kz(Z>zreset) = koff;
 % temperature boundary conditions (0=Neumann 1=Dirichlet)
 % first row/column is value, second is type
 Tbt = [ones(1,nx)*Tcold; ones(1,nx)*1]; % Dirichlet cold
+
+Tbb = [ones(1,nx)*Tbottomvalue; ones(1,nx)*Tbottomtype];
 %Tbb = [ones(1,nx)*Thot; ones(1,nx)*1]; % Dirichlet hot
-Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+%Tbb = [ones(1,nx)*0; ones(1,nx)*0]; % Neumann zero
+
 Tbr = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 %Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % top boundary conduction
 % set this variable to unity to have conduction across the top boundary
-topconduction = 1;
+%topconduction = 1;
 
 % load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
@@ -129,6 +132,6 @@ inoutdir = '~/research/crackingfronts/in_out/';
 % save variables to an input .mat file
 save(tempfilename(1:end-1),'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
-   'alpham','rhobound','Pbound','topconduction','zreset','Thot', ...
+   'alpham','rhobound','Pbound','Ttopconduction','zreset','Thot', ...
    'kon','koff','Z','steady', '-v7.3');
 %fprintf('\nInput file %s written.\n\n',fullinfilename);

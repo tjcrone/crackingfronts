@@ -1,4 +1,4 @@
-function [A,C] = tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb,Tbt,topconduction)
+function [A,C] = tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb,Tbt,Ttopconduction)
 %this function builds matrix and column vector coefficients that
 %are needed to solve the implicit form of the temperature advection-
 %diffusion equation.  A and C are coefficients such that in the 
@@ -49,7 +49,7 @@ C(end,dloc) = (2*lamdam/(d^2))*Tbb(1,dloc);
 AC(end,dloc) = -(2*lamdam/(d^2));
 
 % top conduction
-if topconduction == 1
+if Ttopconduction == 1
    dloc = find(Tbt(2,:)==1);
    C(1,dloc) = (2*lamdam/(d^2))*Tbt(1,dloc);
    AC(1,dloc) = -(2*lamdam/(d^2));
