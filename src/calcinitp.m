@@ -9,7 +9,7 @@ function [initP,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT,P
 %and the density of the inflowing fluid on the bottom boundary to be
 %used if required
 
-%initialize matrices
+% initialize matrices
 initP = [T*0+Ptop;zeros(1,nx)+Ptop];
 coldP = initP;
 hotP = initP;
@@ -17,13 +17,14 @@ Tcold = initP*0;
 T = [T;Tbb(1,:)];
 Pmid = initP;
 
-%build and pressure A matrix
+% build and pressure A matrix
 A = spdiags([-ones(nz+1,1),ones(nz+1,1)], -1:0, nz+1, nz+1);
 
-%compute rhotop (cold)
+% compute rhotop (cold)
 rhotopcold = interptim(PP,TT,RHO,repmat(Ptop,1,nx)/1e5,T(1,:)*0);
-%loop to find cold hydrostatic pressure (no flow)
+% loop to find cold hydrostatic pressure (no flow)
 for i = 1:100
+
    %compute rhof
    rhof = interptim(PP,TT,RHO,coldP./100000,Tcold);
    

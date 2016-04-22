@@ -1,4 +1,4 @@
-function [] = main(inputfile, finfile)
+function [] = main(inputfile)
 % This is the main poroelastic convection model function.  It loads the
 % input variables specified by INPUTFILE, then commences a convection run
 % saving the outputs to a file with the same prefix as the input file. If
@@ -7,16 +7,23 @@ function [] = main(inputfile, finfile)
 %
 % Timothy Crone (tjcrone@gmail.com)
 
+% run makein
+tempfilename = makein(inputfile);
+
+% load the result of makein and delete the temporary mat file
+load(tempfilename(1:end-1), '-mat');
+system(sprintf('rm %s', tempfilename(1:end-1)));
+
 % load input file
-load(['../in_out/',inputfile,'.mat']);
+%load(['../in_out/',inputfile,'.mat']);
 
 % load finfile if required
-if exist('finfile', 'var')
-  if ~isempty(finfile)
-    load(['../in_out/',finfile, '.mat'], 'Tout');
-    T = Tout(:,:,end);
-  end
-end
+%if exist('finfile', 'var')
+%  if ~isempty(finfile)
+%    load(['../in_out/',finfile, '.mat'], 'Tout');
+%    T = Tout(:,:,end);
+%  end
+%end
 
 % globalize thermodynamic tables
 global TT PP RHO CP BETA
@@ -89,20 +96,16 @@ for i = 1:nstep-1
       kx(Z>zreset)=1e-32;
       kz(Z>zreset)=1e-32;
     else
-
       Apress=0.028;
       Atemp=4962.3; 
       KIc=1e6;
       Pw=200e5;
       Tve=900;
       rhoR=2900;
-
       KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
       crack=max(0,KI/KIc);
-
       kx = ones(nz,nx)*kon;  % permeability in x-direction
       kz = ones(nz,nx)*kon;  % permeability in z-direction
-
       kx(crack<1)=1e-32;
       kz(crack<1)=1e-32;
     end
@@ -211,7 +214,7 @@ end
 % save outputs to file
 underloc = strfind(inputfile, '_');
 outfilename = inputfile(1:underloc(end)-1);
-fulloutfilename = ['../in_out/',outfilename,'_fin.mat'];
+fulloutfilename = ['../in_out/',outfilename,'_out.mat'];
 save(fulloutfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','kxout','-v7.3');
 fprintf('\nOutput file %s written.\n\n',fulloutfilename);
 

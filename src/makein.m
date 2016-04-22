@@ -1,4 +1,4 @@
-function [] = makein()
+function [tempfilename] = makein(inputfile)
 % This function creates the input .mat file for the main function.
 % The .mat file produced will contain all the needed variables to begin
 % a new porous convection run. All units are SI, unless otherwise
@@ -8,17 +8,13 @@ function [] = makein()
 %
 % Timothy Crone (tjcrone@gmail.com)
 
-% read 
-% set steady flag if this is going to be a steady state run
-steady=1;
-
-% filename prefix
-fileprefix = 'n08';
+% read input file
+readinput(inputfile);
 
 % time stepping 
-adaptivetime = 1; % set to unity for adaptive time stepping
+%adaptivetime = 1; % set to unity for adaptive time stepping
 if adaptivetime==1
-    nstep = 80000; % number of steps to take with adaptive time stepping
+    %nstep = 80000; % number of steps to take with adaptive time stepping
     t = zeros(1,nstep); % initialize t vector for adaptive time stepping
 else
     stepsize = 1e5; % step size in seconds
@@ -29,9 +25,12 @@ end
 nout = nstep/20; % number of steps to output (must be divisor of nstep)
 
 % domain geometry
-nx = 20; % number of grid cells in x-direction (columns)
-nz = 50; % number of grid cells in z-direction (rows)
-d = 100; % grid cell size (uniform grid, meters)
+%nx = 20; % number of grid cells in x-direction (columns)
+%nz = 50; % number of grid cells in z-direction (rows)
+%d = 100; % grid cell size (uniform grid, meters)
+x = linspace(d/2,(nx-1)*d,nx);
+z = linspace(d/2,(nz-1)*d,nz);
+[~,Z] = meshgrid(x,z);
 
 % some constants
 rhom = 2950; % rock or grain density (basalt)
@@ -42,26 +41,30 @@ phi = ones(nz,nx)*0.03; % porosity
 g = 9.8; % gravitational constant
 
 % initial temperature conditions
-Tcold = 0;
-Thot = 600;
-Tcut = 400;
-zreset = 1000;
-x = linspace(d/2,(nx-1)*d,nx);
-z = linspace(d/2,(nz-1)*d,nz);
-[~,Z] = meshgrid(x,z);
-T = Z*(Tcut-Tcold)/(zreset)+Tcold;
-T(T>Tcut)=Tcut;
-T(Z>zreset)=Thot;
-T(T>Thot) = Thot; % make sure no values are above Thot
-T(T<Tcold) = Tcold; % make sure no values are below Tcold
+%Tcold = 0;
+%Thot = 600;
+%Tcut = 400;
+%zreset = 1000;
+%T = Z*(Tcut-Tcold)/(zreset)+Tcold;
+%T(T>Tcut)=Tcut;
+%T(Z>zreset)=Thot;
+%T(T>Thot) = Thot; % make sure no values are above Thot
+%T(T<Tcold) = Tcold; % make sure no values are below Tcold
 %T = Z*(Thot-Tcold)/(nz*d)+Tcold; % vertical gradient
 %T = T + 2*(rand(nz,nx)-0.5).*(Thot-Tcold)./100; % add some randomness to initial T
 T = Z*0+Tcold;
 T(Z>zreset)=Thot;
 
+% do restart stuff here
+% if restart, load the T. if not, set the initial temperature conditions
+
+
+
+
+
 %initial permeability
-kon = 3e-15;
-koff = 1e-32; 
+%kon = 3e-15;
+%koff = 1e-32; 
 kx = ones(nz,nx)*kon;  % permeability in x-direction
 kz = ones(nz,nx)*kon;  % permeability in z-direction
 kx(Z>zreset) = koff;
@@ -106,27 +109,33 @@ if mod(nstep,nout) ~= 0 || mod(nout,1) ~= 0
    error('Sorry, nout is not a divisor of nstep, or is not an integer.  Input file not written.');
 end
 
+% save the output to a temporary file
+inoutdir = '/Users/tjc/research/crackingfronts/in_out/';
+[status, tempfilename] = system(sprintf('mktemp %sinput.XXXXXX', inoutdir));
+%tempfilename = [tempfilename(1:end-1), '.mat'];
+
+
 % set infilename based on steady
-if steady==1
-  infilename = [fileprefix,'_steady_in.mat'];
-else
-  infilename = [fileprefix,'_cracky_in.mat'];
-end
+%if steady==1
+%  infilename = [fileprefix,'_steady_in.mat'];
+%else
+%  infilename = [fileprefix,'_cracky_in.mat'];
+%end
 
 % define full infile name and check to see if it already exists
-fullinfilename = ['../in_out/',infilename];
-nameexist = fopen(fullinfilename, 'r+');
-if nameexist ~= -1
-   sure = input(sprintf('\nAre you sure you want to overwrite the existing file, %s? (y/n) ', fullinfilename),'s');
-   if isempty(strfind(sure,'y')) || length(sure) ~= 1
-      fclose(nameexist);
-      error('Input file not written.');
-   end
-end
+%fullinfilename = ['../in_out/',infilename];
+%nameexist = fopen(fullinfilename, 'r+');
+%if nameexist ~= -1
+%   sure = input(sprintf('\nAre you sure you want to overwrite the existing file, %s? (y/n) ', fullinfilename),'s');
+%   if isempty(strfind(sure,'y')) || length(sure) ~= 1
+%      fclose(nameexist);
+%      error('Input file not written.');
+%   end
+%end
 
 % save variables to an input .mat file
-save(fullinfilename,'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
+save(tempfilename(1:end-1),'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
    'alpham','rhobound','Pbound','topconduction','zreset','Thot', ...
    'kon','koff','Z','steady', '-v7.3');
-fprintf('\nInput file %s written.\n\n',fullinfilename);
+%fprintf('\nInput file %s written.\n\n',fullinfilename);
