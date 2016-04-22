@@ -110,7 +110,7 @@ if mod(nstep,nout) ~= 0 || mod(nout,1) ~= 0
 end
 
 % save the output to a temporary file
-inoutdir = '/Users/tjc/research/crackingfronts/in_out/';
+inoutdir = '~/research/crackingfronts/in_out/';
 [status, tempfilename] = system(sprintf('mktemp %sinput.XXXXXX', inoutdir));
 %tempfilename = [tempfilename(1:end-1), '.mat'];
 
