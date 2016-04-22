@@ -14,17 +14,6 @@ tempfilename = makein(inputfile);
 load(tempfilename(1:end-1), '-mat');
 system(sprintf('rm %s', tempfilename(1:end-1)));
 
-% load input file
-%load(['../in_out/',inputfile,'.mat']);
-
-% load finfile if required
-%if exist('finfile', 'var')
-%  if ~isempty(finfile)
-%    load(['../in_out/',finfile, '.mat'], 'Tout');
-%    T = Tout(:,:,end);
-%  end
-%end
-
 % globalize thermodynamic tables
 global TT PP RHO CP BETA
 if isempty(TT)
@@ -59,7 +48,7 @@ rhofout = zeros(nz,nx,nout);
 cfout = zeros(nz,nx,nout);
 Tout = zeros(nz,nx,nout);
 Pout = zeros(nz,nx,nout);
-kxout = zeros(nz,nx,nout);
+crackedout = zeros(nz,nx,nout);
 qxout = zeros(nz,nx+1,nout);
 qzout = zeros(nz+1,nx,nout);
 tout = zeros(1,nout);
@@ -71,7 +60,7 @@ Tout(:,:,1) = T1;
 Pout(:,:,1) = P1;
 qxout(:,:,1) = qx1;
 qzout(:,:,1) = qz1;
-kxout(:,:,1) = kx;
+crackedout(:,:,1) = cracked;
 
 % create tentative values at t=2
 rhof2 = rhof1;
@@ -89,13 +78,8 @@ tic;
 % time loop
 for i = 1:nstep-1
 
-    % reset permeability if steady, otherwise do some cracking
-    if steady==1
-      kx = ones(nz,nx)*kon;  % permeability in x-direction
-      kz = ones(nz,nx)*kon;  % permeability in z-direction
-      kx(Z>zreset)=1e-32;
-      kz(Z>zreset)=1e-32;
-    else
+    % if this is not a steady state run, crack
+    if steady==0
       Apress=0.028;
       Atemp=4962.3; 
       KIc=1e6;
@@ -103,11 +87,11 @@ for i = 1:nstep-1
       Tve=900;
       rhoR=2900;
       KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
-      crack=max(0,KI/KIc);
-      kx = ones(nz,nx)*kon;  % permeability in x-direction
-      kz = ones(nz,nx)*kon;  % permeability in z-direction
-      kx(crack<1)=1e-32;
-      kz(crack<1)=1e-32;
+      cracked = ((KI>=KIc)+cracked)>0  
+      kx = koff;
+      kz = koff;
+      kx(cracked) = kon;
+      kz(cracked) = kon;
     end
     
     % set dt using adaptive or predefined time stepping
@@ -151,9 +135,9 @@ for i = 1:nstep-1
     T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
     % reset temperature if steady
-    if steady==1
-      T2(Z>zreset)=Thot;
-    end
+    %if steady==1
+    %  T2(Z>zreset)=Thot;
+    %end
 
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...
@@ -190,7 +174,7 @@ for i = 1:nstep-1
         Pout(:,:,i/(nstep/nout)+1) = P2;
         qxout(:,:,i/(nstep/nout)+1) = qx2;
         qzout(:,:,i/(nstep/nout)+1) = qz2;
-        kxout(:,:,i/(nstep/nout)+1) = kx;
+        crackedout(:,:,i/(nstep/nout)+1) = cracked;
         tout(i/(nstep/nout)+1) = t(i+1);
     end
     
@@ -214,6 +198,6 @@ end
 % save outputs to file
 underloc = strfind(inputfile, '_');
 outfilename = [inputfile(1:underloc(end)-1), '_out.mat'];
-save(outfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','kxout','-v7.3');
+save(outfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','crackedout','-v7.3');
 fprintf('\nOutput file %s written.\n\n',outfilename);
 
