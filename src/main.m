@@ -87,7 +87,7 @@ for i = 1:nstep-1
       Tve=900;
       rhoR=2900;
       KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
-      cracked = ((KI>=KIc)+cracked)>0  
+      cracked = ((KI>=KIc)+cracked)>0;
       kx = koff;
       kz = koff;
       kx(cracked) = kon;
@@ -105,6 +105,7 @@ for i = 1:nstep-1
         else
             dt = min(0.01*d/maxV, 0.5*d^2/1e-6);
         end
+        dt = min([maxstepsize dt]);
         t(i+1)=t(i)+dt;
     else
         % use t vector for dt
@@ -133,11 +134,6 @@ for i = 1:nstep-1
     T2 = reshape(T2,nz,nx);
     T2(T2<0) = 0; % kluge to prevent negative temperatures
     T2(T2>Thot) = Thot; % kluge to prevent overshoots
-
-    % reset temperature if steady
-    %if steady==1
-    %  T2(Z>zreset)=Thot;
-    %end
 
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...
