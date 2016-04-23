@@ -81,7 +81,7 @@ for i = 1:nstep-1
     % if this is not a steady state run, crack
     if steady==0
       Apress=0.028;
-      Atemp=4962.3; 
+      Atemp=4962.3;
       KIc=1e6;
       Pw=200e5;
       Tve=900;
@@ -97,15 +97,25 @@ for i = 1:nstep-1
     % set dt using adaptive or predefined time stepping
     if adaptivetime==1
         % adaptive time stepping based on CFL condition
+
         maxV = max(max(max(qx2)),max(max(qz2)));
         if i==1
             dt = 24*3600;
         elseif i<100
-            dt = min(0.001*d/maxV, 0.5*d^2/1e-6);
+            %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
+            dt = min([0.0001*d/maxV 0.5*d^2/1e-6]);
         else
-            dt = min(0.01*d/maxV, 0.5*d^2/1e-6);
+            %[dt, adaptivecrit(i)]  = min([0.01*d/maxV 0.5*d^2/1e-6]);
+            dt = min([0.0001*d/maxV 0.5*d^2/1e-6]);
         end
-        dt = min([maxstepsize dt]);
+
+        %dt = min([maxstepsize dt]);
+
+%dtout(i) = dt;
+%disp(dt)
+
+%keyboard;
+
         t(i+1)=t(i)+dt;
     else
         % use t vector for dt
@@ -194,6 +204,7 @@ end
 % save outputs to file
 underloc = strfind(inputfile, '_');
 outfilename = [inputfile(1:underloc(end)-1), '_out.mat'];
-save(outfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','crackedout','-v7.3');
+save(outfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','crackedout', ...
+  '-v7.3');
 fprintf('\nOutput file %s written.\n\n',outfilename);
 
