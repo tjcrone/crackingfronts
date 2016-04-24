@@ -103,10 +103,10 @@ for i = 1:nstep-1
             dt = 24*3600;
         elseif i<100
             %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
-            dt = min([0.0001*d/maxV 0.5*d^2/1e-6]);
+            dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
         else
             %[dt, adaptivecrit(i)]  = min([0.01*d/maxV 0.5*d^2/1e-6]);
-            dt = min([0.0001*d/maxV 0.5*d^2/1e-6]);
+            dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
         end
 
         %dt = min([maxstepsize dt]);
