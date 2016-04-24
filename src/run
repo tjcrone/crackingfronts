@@ -1,0 +1,7 @@
+#!/bin/bash
+# This is a Bash script to run main.m from the command line, in the
+# background using Matlab.
+
+
+
+echo $1
