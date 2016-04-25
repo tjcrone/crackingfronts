@@ -1,4 +1,4 @@
-function [tempfilename] = makein(inputfile)
+function [tmpfilename] = makein(inputfile)
 % This function creates the input .mat file for the main function.
 % The .mat file produced will contain all the needed variables to begin
 % a new porous convection run. All units are SI, unless otherwise
@@ -115,10 +115,10 @@ Pbl = [ones(nz,1).*0 ones(nz,1)*0]; % closed
 
 % save the output to a temporary file
 inoutdir = '~/research/crackingfronts/in_out/';
-[status, tempfilename] = system(sprintf('mktemp %sinput.XXXXXX', inoutdir));
+[status, tmpfilename] = system(sprintf('mktemp %sinput.XXXXXX', inoutdir));
 
 % save variables to an input .mat file
-save(tempfilename(1:end-1),'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
+save(tmpfilename(1:end-1),'adaptivetime','t','nstep','nout','nx','nz','d','cm','lamdam','phi', ...
    'rhom','kx','kz','g','T','P','Tbb','Tbl','Tbr','Tbt','Ptop','Pbt','Pbb','Pbl','Pbr', ...
    'alpham','rhobound','Pbound','Ttopconduction','cracked','Thot', ...
    'kon','koff','Z','steady','maxstepsize', '-v7.3');

@@ -1,7 +1,26 @@
 #!/bin/bash
 # This is a Bash script to run main.m from the command line, in the
-# background using Matlab.
+# background using Matlab. Pass the fully qualified filename of an
+# input file as the only argument.
+#
+# Timothy Crone (tjcrone@gmail.com)
 
+# check number of arguments
+if [[ $# -ne 1 ]]; then
+  echo "Pass the name of an input file as the only argument."
+  exit
+fi
 
+# define log file
+INFILE=$1
+LOGFILE="${INFILE%_*}_out.log"
 
-echo $1
+# create temporary matlab run file and populate it
+TMP=`mktemp $1.XXXXXX`
+echo "run('$1');" > $TMP
+
+# run matlab in the background
+nohup /usr/local/bin/matlab -nodesktop -nosplash < $TMP > $LOGFILE &
+
+# delete temporary run file
+rm $TMP

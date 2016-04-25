@@ -1,18 +1,16 @@
-function [] = main(inputfile)
-% This is the main poroelastic convection model function.  It loads the
+function [] = run(inputfile)
+% This is the main poroelastic convection model function.  It creates and loads the
 % input variables specified by INPUTFILE, then commences a convection run
-% saving the outputs to a file with the same prefix as the input file. If
-% FINFILE is included, a restart is assumed and the final temperature from
-% FINFILE is loaded as the starting temperature field.
+% saving the outputs to a file with the same prefix as the input file.
 %
 % Timothy Crone (tjcrone@gmail.com)
 
 % run makein
-tempfilename = makein(inputfile);
+tmpfilename = makein(inputfile);
 
 % load the result of makein and delete the temporary mat file
-load(tempfilename(1:end-1), '-mat');
-system(sprintf('rm %s', tempfilename(1:end-1)));
+load(tmpfilename(1:end-1), '-mat');
+system(sprintf('rm %s', tmpfilename(1:end-1)));
 
 % globalize thermodynamic tables
 global TT PP RHO CP BETA
@@ -97,7 +95,6 @@ for i = 1:nstep-1
     % set dt using adaptive or predefined time stepping
     if adaptivetime==1
         % adaptive time stepping based on CFL condition
-
         maxV = max(max(max(qx2)),max(max(qz2)));
         if i==1
             dt = 24*3600;
