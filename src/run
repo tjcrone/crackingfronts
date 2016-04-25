@@ -17,9 +17,9 @@ LOGFILE="${INFILE%_*}_out.log"
 
 # create temporary matlab run file and populate it
 TMP=`mktemp $1.XXXXXX`
-echo "run('$1');" > $TMP
+echo "run('$INFILE');" > $TMP
 
-# run matlab in the background
+# run matlab in the background with nohup
 nohup /usr/local/bin/matlab -nodesktop -nosplash < $TMP > $LOGFILE &
 
 # delete temporary run file
