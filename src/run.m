@@ -91,7 +91,7 @@ for i = 1:nstep-1
       kx(cracked) = kon;
       kz(cracked) = kon;
     end
-    
+
     % set dt using adaptive or predefined time stepping
     if adaptivetime==1
         % adaptive time stepping based on CFL condition
@@ -100,19 +100,13 @@ for i = 1:nstep-1
             dt = 24*3600;
         elseif i<100
             %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
-            dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
+            dt = min([0.001*d/maxV 0.001*d^2/1e-6]);
         else
             %[dt, adaptivecrit(i)]  = min([0.01*d/maxV 0.5*d^2/1e-6]);
-            dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
+            %dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
+            dt = min([stepfraction*d/maxV stepfraction*d^2/1e-6]);
         end
-
         %dt = min([maxstepsize dt]);
-
-%dtout(i) = dt;
-%disp(dt)
-
-%keyboard;
-
         t(i+1)=t(i)+dt;
     else
         % use t vector for dt
