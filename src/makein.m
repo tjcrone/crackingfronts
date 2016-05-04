@@ -68,14 +68,11 @@ if restart==1
     cracked = R.crackedout(:,:,end);
   end 
 
-
   %[m, n] = size(Tres);
   %if n~=nx
   %  error('Restarted temperature field must have the same number of columns.');
   %end
   %T(1:m,:) = Tres;
-
-
 end
 
 %initial permeability
