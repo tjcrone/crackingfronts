@@ -87,7 +87,7 @@ T2 = T1;
 tic;
 
 % include in input:
-npiccard=10;
+npicard=10;
 tdamp=0.1;
 
 % time loop
@@ -130,8 +130,8 @@ for i = 1:nstep-1
         dt = t(i+1)-t(i);
     end
 
-% piccard itterations
-for j=1:npiccard
+% picard itterations
+for j=1:npicard
 
     % compute beta for temperature equation
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
@@ -182,7 +182,7 @@ for j=1:npiccard
     % compute darcy velocities (t=2)
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
 
-% test piccard itterations
+% test picard itterations
 %beta2test(:,:,j) = beta2;
 %T2test(:,:,j) = T2;
 %P2test(:,:,j) = P2;
@@ -194,7 +194,7 @@ for j=1:npiccard
 
 end
 %if i>350
-%npiccard = 200;
+%npicard = 200;
 %end
 %if i>351
 %keyboard;
