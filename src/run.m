@@ -86,10 +86,6 @@ T2 = T1;
 % start timer
 tic;
 
-% include in input:
-npicard=10;
-tdamp=0.1;
-
 % time loop
 for i = 1:nstep-1
 
