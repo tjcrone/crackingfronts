@@ -13,7 +13,7 @@ load(tmpfilename(1:end-1), '-mat');
 system(sprintf('rm %s', tmpfilename(1:end-1)));
 
 % globalize thermodynamic tables
-global TT PP RHO CP BETA
+global TT PP RHO CP
 if isempty(TT)
     load('../hydrotables/hydrotab8.mat');
 end

@@ -94,7 +94,7 @@ Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 %Tbl = [ones(nz,1)*Thot ones(nz,1)*1]; % Dirichlet hot
 
 % load or globalize thermodynamic tables
-global TT PP RHO CP BETA ALPHA
+global TT PP RHO CP
 if isempty(TT)
    load('../hydrotables/hydrotab8.mat');
 end

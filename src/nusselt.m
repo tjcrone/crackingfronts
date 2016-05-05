@@ -9,7 +9,7 @@ function [Nu] = nusselt(nx,nz,d,T,P,lamdam,Tbt,Tbb,kx,kz,g, ...
 % separate horizontal control volume bands in the model domain.
 
 % calculate rhof,cf,qx,qz
-global TT PP RHO CP BETA ALPHA
+global TT PP RHO CP
 if isempty(TT)
    load('../hydrotables/hydrotab8.mat');
 end

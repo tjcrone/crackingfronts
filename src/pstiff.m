@@ -6,7 +6,7 @@ function [A,B,C] = pstiff(nx,nz,d,Se,rhof,rhobt,rhobb,rhobr, ...
 %boundary and neumann bottom boundary.  this is fixed for now!
 
 %load or globalize thermodynamic tables
-global TT PP RHO CP BETA ALPHA
+global TT PP RHO CP
 if isempty(TT)
     load('../hydrotables/hydrotab8.mat');
 end

@@ -7,7 +7,7 @@ function [qx,qz] = darcy(nx,nz,P,rhof,rhobb,kx,kz,mu,g,d,Pbt,Pbb,Pbr,Pbl,T)
 %matrices, and Pb(x) are the pressure boundary conditions.
 
 %load or globalize thermodynamic tables
-global TT PP RHO CP BETA ALPHA
+global TT PP RHO CP
 if isempty(TT)
    load('../hydrotables/hydrotab8.mat');
 end
