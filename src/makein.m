@@ -96,7 +96,7 @@ Tbl = [ones(nz,1)*0 ones(nz,1)*0]; % Neumann zero
 % load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
-   load('../hydrotables/hydrotab7.mat');
+   load('../hydrotables/hydrotab8.mat');
 end
 
 % calculate starting pressure field uxing calcinitp

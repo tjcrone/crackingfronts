@@ -8,7 +8,7 @@ function [A,B,C] = pstiff(nx,nz,d,Se,rhof,rhobt,rhobb,rhobr, ...
 %load or globalize thermodynamic tables
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
-    load('../hydrotables/hydrotab7.mat');
+    load('../hydrotables/hydrotab8.mat');
 end
 
 %Compute interface viscosities from mu

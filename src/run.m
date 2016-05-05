@@ -15,7 +15,7 @@ system(sprintf('rm %s', tmpfilename(1:end-1)));
 % globalize thermodynamic tables
 global TT PP RHO CP BETA
 if isempty(TT)
-    load('../hydrotables/hydrotab7.mat');
+    load('../hydrotables/hydrotab8.mat');
 end
 
 % add step signifier to some variables

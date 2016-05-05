@@ -11,7 +11,7 @@ function [Nu] = nusselt(nx,nz,d,T,P,lamdam,Tbt,Tbb,kx,kz,g, ...
 % calculate rhof,cf,qx,qz
 global TT PP RHO CP BETA ALPHA
 if isempty(TT)
-   load('../hydrotables/hydrotab7.mat');
+   load('../hydrotables/hydrotab8.mat');
 end
 
 rhof = interptim(PP,TT,RHO,P./100000,T);
