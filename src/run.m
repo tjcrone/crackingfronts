@@ -86,6 +86,10 @@ T2 = T1;
 % start timer
 tic;
 
+% include in input:
+npiccard=10;
+tdamp=0.1;
+
 % time loop
 for i = 1:nstep-1
 
@@ -111,7 +115,7 @@ for i = 1:nstep-1
         maxV = max(max(max(qx2)),max(max(qz2)));
         if i==1
             dt = 24*3600;
-        elseif i<100
+        elseif i<10
             %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
             dt = min([0.001*d/maxV 0.001*d^2/1e-6]);
         else
@@ -125,6 +129,9 @@ for i = 1:nstep-1
         % use t vector for dt
         dt = t(i+1)-t(i);
     end
+
+% piccard itterations
+for j=1:npiccard
 
     % compute beta for temperature equation
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
@@ -144,10 +151,13 @@ for i = 1:nstep-1
     RHS = reshape(T1,nx*nz,1).*beta2 + dt*(CimpT + DimpT); %see p. 464
         
     % and solve:
-    T2 = Tstiff\RHS;
-    T2 = reshape(T2,nz,nx);
-    T2(T2<0) = 0; % kluge to prevent negative temperatures
+    T2int = Tstiff\RHS;
+    T2int = reshape(T2int,nz,nx);
+    T2int(T2int<0) = 0; % kluge to prevent negative temperatures
     %T2(T2>Thot) = Thot; % kluge to prevent overshoots
+
+    % damping
+    T2 = T1+tdamp*(T2int-T1);
 
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...
@@ -163,7 +173,7 @@ for i = 1:nstep-1
     % and solve:
     P2 = Pstiffness\PRHS;
     P2 = reshape(P2,nz,nx);
-        
+
     % compute T-P dependent fluid properties (t=2)
     mu2 = dynvisc(T2);
     rhof2 = interptim(PP,TT,RHO,P2./100000,T2); %fluid density
@@ -171,7 +181,25 @@ for i = 1:nstep-1
         
     % compute darcy velocities (t=2)
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
-        
+
+% test piccard itterations
+%beta2test(:,:,j) = beta2;
+%T2test(:,:,j) = T2;
+%P2test(:,:,j) = P2;
+%mu2test(:,:,j) = mu2;
+%rhof2test(:,:,j) = rhof2;
+%cf2test(:,:,j) = cf2;
+%qx2test(:,:,j) = qx2;
+%qz2test(:,:,j) = qz2;
+
+end
+%if i>350
+%npiccard = 200;
+%end
+%if i>351
+%keyboard;
+%end
+
     % shift variables
     P1 = P2;
     T1 = T2;   

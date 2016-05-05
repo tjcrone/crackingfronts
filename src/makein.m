@@ -45,12 +45,13 @@ cracked = logical(Z*0+1);
 cracked(Z>frontdepth) = 0;
 
 % initial temperature conditions
-T = Z*0+Tcold;
+rng('default');
+T = Z*0+Tcold+rand(nz,nx);
 T(~cracked) = Thot;
 
 % restart temperature and uncracked fields if required
 if restart==1
-  R = load(restartfile, 'Tout', 'crackedout');
+  R = load(restartfile, 'Tout', 'crackedout', 'Pout');
   T_res = R.Tout(:,:,end);
 
   % map Tres onto current geometry if necessary
@@ -103,6 +104,14 @@ end
 Ptop = 20e6; % average seafloor pressure at top of domain
 [P,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
     PP,RHO,g,d);
+if restart==1
+  P_res = R.Pout(:,:,end);
+  if sum(size(P)==size(P_res))~=2
+    error('Geometry resizing not yet allowed');
+  else % same size as restart
+    P = P_res;
+  end 
+end
 
 % pressure boundary conditions (0=Neumann 1=Dirichlet)
 Pbt = [ones(1,nx).*Ptop;ones(1,nx)*1]; % open
