@@ -41,24 +41,37 @@ cfbl = interptim(PP,TT,CP,P1(:,1)  ./100000,Tbl(:,1));
 % compute darcy velocities (t=1)
 [qx1,qz1] = darcy(nx,nz,P1,rhof1,rhobb,kx,kz,mu1,g,d,Pbt,Pbb,Pbr,Pbl,T1);
 
-% initialize output
-rhofout = zeros(nz,nx,nout);
-cfout = zeros(nz,nx,nout);
-Tout = zeros(nz,nx,nout);
-Pout = zeros(nz,nx,nout);
-crackedout = zeros(nz,nx,nout);
-qxout = zeros(nz,nx+1,nout);
-qzout = zeros(nz+1,nx,nout);
+% initialize tout (used for timing information)
 tout = zeros(1,nout);
 
+% delete previous output file if it exists
+underloc = strfind(inputfile, '_');
+outfilename = [inputfile(1:underloc(end)-1), '_out.mat'];
+if exist(outfilename, 'file') == 2
+  system(sprintf('rm %s', outfilename));
+end
+
+% open output file object
+outfileobj = matfile(outfilename);
+
+% initialize output file variables in output file
+outfileobj.rhofout = zeros(nz,nx,nout);
+outfileobj.cfout = zeros(nz,nx,nout);
+outfileobj.Tout = zeros(nz,nx,nout);
+outfileobj.Pout = zeros(nz,nx,nout);
+outfileobj.crackedout = logical(zeros(nz,nx,nout));
+outfileobj.qxout = zeros(nz,nx+1,nout);
+outfileobj.qzout = zeros(nz+1,nx,nout);
+outfileobj.tout = tout;
+
 % store t=1 output
-rhofout(:,:,1) = rhof1;
-cfout(:,:,1) = cf1;
-Tout(:,:,1) = T1;
-Pout(:,:,1) = P1;
-qxout(:,:,1) = qx1;
-qzout(:,:,1) = qz1;
-crackedout(:,:,1) = cracked;
+outfileobj.rhofout(:,:,1) = rhof1;
+outfileobj.cfout(:,:,1) = cf1;
+outfileobj.Tout(:,:,1) = T1;
+outfileobj.Pout(:,:,1) = P1;
+outfileobj.qxout(:,:,1) = qx1;
+outfileobj.qzout(:,:,1) = qz1;
+outfileobj.crackedout(:,:,1) = cracked;
 
 % create tentative values at t=2
 rhof2 = rhof1;
@@ -163,16 +176,17 @@ for i = 1:nstep-1
     P1 = P2;
     T1 = T2;   
     
-    % store outputs
+    % write outputs to outfile object
     if mod(i,nstep/nout) == 0;
-        rhofout(:,:,i/(nstep/nout)+1) = rhof2;
-        cfout(:,:,i/(nstep/nout)+1) = cf2;
-        Tout(:,:,i/(nstep/nout)+1) = T2;
-        Pout(:,:,i/(nstep/nout)+1) = P2;
-        qxout(:,:,i/(nstep/nout)+1) = qx2;
-        qzout(:,:,i/(nstep/nout)+1) = qz2;
-        crackedout(:,:,i/(nstep/nout)+1) = cracked;
         tout(i/(nstep/nout)+1) = t(i+1);
+        outfileobj.rhofout(:,:,i/(nstep/nout)+1) = rhof2;
+        outfileobj.cfout(:,:,i/(nstep/nout)+1) = cf2;
+        outfileobj.Tout(:,:,i/(nstep/nout)+1) = T2;
+        outfileobj.Pout(:,:,i/(nstep/nout)+1) = P2;
+        outfileobj.qxout(:,:,i/(nstep/nout)+1) = qx2;
+        outfileobj.qzout(:,:,i/(nstep/nout)+1) = qz2;
+        outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
+        outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
     end
     
     % update progress bar
@@ -191,11 +205,3 @@ if daysperstep>365
 else
     fprintf('Average model time per step\t%.1f days\n',daysperstep);
 end
-
-% save outputs to file
-underloc = strfind(inputfile, '_');
-outfilename = [inputfile(1:underloc(end)-1), '_out.mat'];
-save(outfilename,'rhofout', 'cfout', 'Tout','Pout','qxout','qzout','tout','crackedout', ...
-  '-v7.3');
-fprintf('\nOutput file %s written.\n\n',outfilename);
-
