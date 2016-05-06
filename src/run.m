@@ -96,12 +96,6 @@ for i = 1:nstep-1
 
     % if this is not a steady state run, crack
     if steady==0
-      Apress=0.028;
-      Atemp=4962.3;
-      KIc=1e6;
-      Pw=200e5;
-      Tve=900;
-      rhoR=2900;
       KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
       cracked = ((KI>=KIc)+cracked)>0;
       kx = koff;
