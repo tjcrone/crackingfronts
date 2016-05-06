@@ -48,7 +48,12 @@ tout = zeros(1,nout);
 underloc = strfind(inputfile, '_');
 outfilename = [inputfile(1:underloc(end)-1), '_out.mat'];
 if exist(outfilename, 'file') == 2
-  system(sprintf('rm %s', outfilename));
+  reply = input('Output file exists. Press ''y'' to overwrite. ','s');
+  if strcmp(reply, 'y')
+    system(sprintf('rm %s', outfilename));
+  else
+    return
+  end
 end
 
 % open output file object
@@ -179,16 +184,20 @@ for j=1:npicard
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
 
 % test picard itterations
-%beta2test(:,:,j) = beta2;
-%T2test(:,:,j) = T2;
-%P2test(:,:,j) = P2;
-%mu2test(:,:,j) = mu2;
-%rhof2test(:,:,j) = rhof2;
-%cf2test(:,:,j) = cf2;
-%qx2test(:,:,j) = qx2;
-%qz2test(:,:,j) = qz2;
+beta2test(:,:,j) = beta2;
+T2test(:,:,j) = T2;
+P2test(:,:,j) = P2;
+mu2test(:,:,j) = mu2;
+rhof2test(:,:,j) = rhof2;
+cf2test(:,:,j) = cf2;
+qx2test(:,:,j) = qx2;
+qz2test(:,:,j) = qz2;
 
 end
+if max(max(T2))>600
+  keyboard;
+end
+
 %if i>350
 %npicard = 200;
 %end
