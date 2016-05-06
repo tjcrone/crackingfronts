@@ -94,40 +94,41 @@ tic;
 % time loop
 for i = 1:nstep-1
 
-    % if this is not a steady state run, crack
-    if steady==0
-      KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
-      cracked = ((KI>=KIc)+cracked)>0;
-      kx = koff;
-      kz = koff;
-      kx(cracked) = kon;
-      kz(cracked) = kon;
-    end
+  % if this is not a steady state run, crack
+  if steady==0
+    KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
+    cracked = ((KI>=KIc)+cracked)>0;
+    kx = koff;
+    kz = koff;
+    kx(cracked) = kon;
+    kz(cracked) = kon;
+  end
 
-    % set dt using adaptive or predefined time stepping
-    if adaptivetime==1
-        % adaptive time stepping based on CFL condition
-        maxV = max(max(max(qx2)),max(max(qz2)));
-        if i==1
-            dt = 24*3600;
-        elseif i<10
-            %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
-            dt = min([0.001*d/maxV 0.001*d^2/1e-6]);
-        else
-            %[dt, adaptivecrit(i)]  = min([0.01*d/maxV 0.5*d^2/1e-6]);
-            %dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
-            dt = min([stepfraction*d/maxV stepfraction*d^2/1e-6]);
-        end
-        %dt = min([maxstepsize dt]);
-        t(i+1)=t(i)+dt;
+  % set dt using adaptive or predefined time stepping
+  if adaptivetime==1
+    % adaptive time stepping based on CFL condition
+    maxV = max(max(max(qx2)),max(max(qz2)));
+    if i==1
+      dt = 24*3600;
+    elseif i<10
+      %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
+      dt = min([0.001*d/maxV 0.001*d^2/1e-6]);
     else
-        % use t vector for dt
-        dt = t(i+1)-t(i);
+      %[dt, adaptivecrit(i)]  = min([0.01*d/maxV 0.5*d^2/1e-6]);
+      %dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
+      dt = min([stepfraction*d/maxV stepfraction*d^2/1e-6]);
     end
+    %dt = min([maxstepsize dt]);
+    t(i+1)=t(i)+dt;
+  else
+    % use t vector for dt
+    dt = t(i+1)-t(i);
+  end
 
-% picard itterations
-for j=1:npicard
-
+  % picard itterations
+  T2last = T1;
+  maxpicard = 20;
+  for j = 1:maxpicard
     % compute beta for temperature equation
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
         
@@ -135,9 +136,8 @@ for j=1:npicard
     [AimpT,CimpT] = tdiffcoeff(nx,nz,d,lamdam,Tbr,Tbl,Tbb,Tbt,Ttopconduction);
 
     % compute T2 using implicit technique
-    [BimpT,DimpT] = tadvectcoeff(nx,nz,d,qx2,qz2,rhof2,cf2, ...
-        Tbb,Tbt,Tbr,Tbl,rhobt,rhobb,rhobr,rhobl,cfbt,cfbb, ...
-        cfbr,cfbl);
+    [BimpT,DimpT] = tadvectcoeff(nx,nz,d,qx2,qz2,rhof2,cf2,Tbb,Tbt,Tbr,Tbl, ...
+      rhobt,rhobb,rhobr,rhobl,cfbt,cfbb,cfbr,cfbl);
         
     % single step implicit left hand side stiffness:
     Tstiff = spdiags(beta2,0,nx*nz,nx*nz) - dt*(AimpT + BimpT);
@@ -154,10 +154,21 @@ for j=1:npicard
     % damping
     T2 = T1+tdamp*(T2int-T1);
 
+    % convergence check
+    picardthresh = 0.01;
+    if ((abs(T2-T2last))./(abs(T2-T1)))<picardthresh
+      %disp(j)
+      %outfileobj.npicard(1,i) = j;
+      break;
+    end
+    if j==maxpicard
+      error(sprintf('Picard iterations failed to converge over %i steps.', maxpicard));
+    end
+    T2last = T2;
+
     % compute P2 using implicit technique
-    [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2, ...
-        rhobt,rhobb,rhobr,rhobl,qx2,qz2,kx,kz,mu2,g,T2,Pbt, ...
-        Pbb,Pbr,Pbl);
+    [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2,rhobt,rhobb,rhobr,rhobl, ...
+      qx2,qz2,kx,kz,mu2,g,T2,Pbt,Pbb,Pbr,Pbl);
 
     % single step implicit left hand side stiffness:
     Pstiffness = AimpP;
@@ -177,47 +188,46 @@ for j=1:npicard
     % compute darcy velocities (t=2)
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
 
-% test picard itterations
-beta2test(:,:,j) = beta2;
-T2test(:,:,j) = T2;
-P2test(:,:,j) = P2;
-mu2test(:,:,j) = mu2;
-rhof2test(:,:,j) = rhof2;
-cf2test(:,:,j) = cf2;
-qx2test(:,:,j) = qx2;
-qz2test(:,:,j) = qz2;
+    % test picard itterations
+    %beta2test(:,:,j) = beta2;
+    %T2test(:,:,j) = T2;
+    %P2test(:,:,j) = P2;
+    %mu2test(:,:,j) = mu2;
+    %rhof2test(:,:,j) = rhof2;
+    %cf2test(:,:,j) = cf2;
+    %qx2test(:,:,j) = qx2;
+    %qz2test(:,:,j) = qz2;
+  end
+  %if max(max(T2))>600
+  %  keyboard;
+  %end
 
-end
-if max(max(T2))>600
-  keyboard;
-end
+  %if i>350
+  %npicard = 200;
+  %end
+  %if i>351
+  %keyboard;
+  %end
 
-%if i>350
-%npicard = 200;
-%end
-%if i>351
-%keyboard;
-%end
-
-    % shift variables
-    P1 = P2;
-    T1 = T2;   
+  % shift variables
+  P1 = P2;
+  T1 = T2;   
     
-    % write outputs to outfile object
-    if mod(i,nstep/nout) == 0;
-        tout(i/(nstep/nout)+1) = t(i+1);
-        outfileobj.rhofout(:,:,i/(nstep/nout)+1) = rhof2;
-        outfileobj.cfout(:,:,i/(nstep/nout)+1) = cf2;
-        outfileobj.Tout(:,:,i/(nstep/nout)+1) = T2;
-        outfileobj.Pout(:,:,i/(nstep/nout)+1) = P2;
-        outfileobj.qxout(:,:,i/(nstep/nout)+1) = qx2;
-        outfileobj.qzout(:,:,i/(nstep/nout)+1) = qz2;
-        outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
-        outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
-    end
+  % write outputs to outfile object
+  if mod(i,nstep/nout) == 0;
+    tout(i/(nstep/nout)+1) = t(i+1);
+    outfileobj.rhofout(:,:,i/(nstep/nout)+1) = rhof2;
+    outfileobj.cfout(:,:,i/(nstep/nout)+1) = cf2;
+    outfileobj.Tout(:,:,i/(nstep/nout)+1) = T2;
+    outfileobj.Pout(:,:,i/(nstep/nout)+1) = P2;
+    outfileobj.qxout(:,:,i/(nstep/nout)+1) = qx2;
+    outfileobj.qzout(:,:,i/(nstep/nout)+1) = qz2;
+    outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
+    outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
+  end
     
-    % update progress bar
-    progressbar(i,nstep-1,mfilename, 'working ...');
+  % update progress bar
+  progressbar(i,nstep-1,mfilename, 'working ...');
 end
 
 % print timing info
@@ -228,7 +238,7 @@ fprintf('Wall time per step\t\t%.2f seconds\n',etime/nstep);
 fprintf('Total model time\t\t%.1f years\n', tout(end)/60/60/24/365);
 daysperstep = mean(diff(tout(end-round(length(tout)/4):end)))/60/60/24;
 if daysperstep>365
-    fprintf('Average model time per step\t%.2f years\n',daysperstep/365);
+  fprintf('Average model time per step\t%.2f years\n',daysperstep/365);
 else
-    fprintf('Average model time per step\t%.1f days\n',daysperstep);
+  fprintf('Average model time per step\t%.1f days\n',daysperstep);
 end
