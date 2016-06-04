@@ -101,7 +101,7 @@ if isempty(TT)
 end
 
 % calculate starting pressure field uxing calcinitp
-Ptop = 20e6; % average seafloor pressure at top of domain
+%Ptop = 20e6; % average seafloor pressure at top of domain
 [P,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
     PP,RHO,g,d);
 if restart==1

@@ -91,6 +91,10 @@ T2 = T1;
 % start timer
 tic;
 
+% test stuff
+T2test = zeros([nz nx maxpicard]);
+P2test = zeros([nz nx maxpicard]);
+
 % time loop
 for i = 1:nstep-1
 
@@ -127,7 +131,7 @@ for i = 1:nstep-1
 
   % picard itterations
   T2last = T1;
-  maxpicard = 20;
+  %maxpicard = 20;
   for j = 1:maxpicard
     % compute beta for temperature equation
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
@@ -146,26 +150,27 @@ for i = 1:nstep-1
     RHS = reshape(T1,nx*nz,1).*beta2 + dt*(CimpT + DimpT); %see p. 464
         
     % and solve:
-    T2int = Tstiff\RHS;
-    T2int = reshape(T2int,nz,nx);
-    T2int(T2int<0) = 0; % kluge to prevent negative temperatures
+    %T2int = Tstiff\RHS;
+    T2 = Tstiff\RHS;
+    %T2int = reshape(T2int,nz,nx);
+    T2 = reshape(T2,nz,nx);
+    %T2int(T2int<0) = 0; % kluge to prevent negative temperatures
+    T2(T2<0) = 0; % kluge to prevent negative temperatures
     %T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
     % damping
-    T2 = T1+tdamp*(T2int-T1);
+    tdamp = min([j*0.01 0.2]);
+    %tdamp = j*0.01;
+    %tdamp = 0.3;
+    T2 = T2last+tdamp*(T2-T2last);
+    %T2 = T1+tdamp*(T2-T1);
 
-    % convergence check
-    picardthresh = 0.01;
-    if ((abs(T2-T2last))./(abs(T2-T1)))<picardthresh
-      %disp(j)
-      %outfileobj.npicard(1,i) = j;
-      break;
-    end
-    if j==maxpicard
-      error(sprintf('Picard iterations failed to converge over %i steps.', maxpicard));
-    end
-    T2last = T2;
-
+    % update T-P dependent fluid properties and Darcy velocities
+    mu2 = dynvisc(T2);
+    rhof2 = interptim(PP,TT,RHO,P2./100000,T2); %fluid density
+    cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
+    [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
+        
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2,rhobt,rhobb,rhobr,rhobl, ...
       qx2,qz2,kx,kz,mu2,g,T2,Pbt,Pbb,Pbr,Pbl);
@@ -177,27 +182,61 @@ for i = 1:nstep-1
     PRHS = -BimpP-CimpP;
 
     % and solve:
+    %P2int = Pstiffness\PRHS;
     P2 = Pstiffness\PRHS;
+    %P2int = reshape(P2int,nz,nx);
     P2 = reshape(P2,nz,nx);
 
-    % compute T-P dependent fluid properties (t=2)
+    % pressure damping
+    %P2 = P1+tdamp*(P2int-P1);
+    %P2 = P1;
+
+    % update T-P dependent fluid properties and Darcy velocities
     mu2 = dynvisc(T2);
     rhof2 = interptim(PP,TT,RHO,P2./100000,T2); %fluid density
     cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
-        
-    % compute darcy velocities (t=2)
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
 
     % test picard itterations
     %beta2test(:,:,j) = beta2;
-    %T2test(:,:,j) = T2;
-    %P2test(:,:,j) = P2;
+    T2test(:,:,j) = T2;
+    P2test(:,:,j) = P2;
     %mu2test(:,:,j) = mu2;
     %rhof2test(:,:,j) = rhof2;
     %cf2test(:,:,j) = cf2;
     %qx2test(:,:,j) = qx2;
     %qz2test(:,:,j) = qz2;
+
+    % convergence check
+    %picardthresh = 0.01;
+    %maxdel = find(abs(T2-T1)==max(max(abs(T2-T1))),1,'first');
+    maxdel = find(abs(T2-T2last)==max(max(abs(T2-T2last))),1,'first');
+
+    %if abs(T2(maxdel)-T2last(maxdel)) < 0.1 && j > 10 % picardthresh && j>10
+    %if abs(T2(maxdel)-T2last(maxdel))/T2last(maxdel) < picardthresh && j>10
+    %if max(max(((abs(T2-T2last))./(abs(T2-T1))))) < picardthresh
+    %  disp(j)
+    %  outfileobj.npicard(1,i) = j;
+    %  break;
+    %end
+    if j==maxpicard
+      disp(i);
+      break;
+      %keyboard;
+      %error(sprintf('Picard iterations failed to converge over %i steps.', maxpicard));
+    end
+    T2last = T2;
   end
+
+  if i>20
+    keyboard;
+  end
+
+  %if j>20
+  %  keyboard;
+  %end
+  %clear T2test;
+  %clear P2test;
   %if max(max(T2))>600
   %  keyboard;
   %end
@@ -224,6 +263,7 @@ for i = 1:nstep-1
     outfileobj.qzout(:,:,i/(nstep/nout)+1) = qz2;
     outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
     outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
+    %disp(i)
   end
     
   % update progress bar
