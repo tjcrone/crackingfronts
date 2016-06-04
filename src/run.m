@@ -41,7 +41,7 @@ cfbl = interptim(PP,TT,CP,P1(:,1)  ./100000,Tbl(:,1));
 % compute darcy velocities (t=1)
 [qx1,qz1] = darcy(nx,nz,P1,rhof1,rhobb,kx,kz,mu1,g,d,Pbt,Pbb,Pbr,Pbl,T1);
 
-% initialize tout (used for timing information)
+% initialize tout (used for debugging)
 tout = zeros(1,nout);
 
 % delete previous output file if it exists
@@ -159,7 +159,7 @@ for i = 1:nstep-1
     %T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
     % damping
-    tdamp = min([j*0.01 0.2]);
+    tdamp = min([j*0.1 1]);
     %tdamp = j*0.01;
     %tdamp = 0.3;
     T2 = T2last+tdamp*(T2-T2last);
