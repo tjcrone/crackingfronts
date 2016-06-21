@@ -1,5 +1,5 @@
 function [] = run(inputfile)
-% This is the main poroelastic convection model function.  It creates and loads the
+% This is the main poroelastic convection model function. It creates and loads the
 % input variables specified by INPUTFILE, then commences a convection run
 % saving the outputs to a file with the same prefix as the input file.
 %
@@ -115,23 +115,18 @@ for i = 1:nstep-1
     if i==1
       dt = 24*3600;
     elseif i<10
-      %[dt, adaptivecrit(i)] = min([0.001*d/maxV 0.5*d^2/1e-6]);
       dt = min([0.001*d/maxV 0.001*d^2/1e-6]);
     else
-      %[dt, adaptivecrit(i)]  = min([0.01*d/maxV 0.5*d^2/1e-6]);
-      %dt = min([0.01*d/maxV 0.5*d^2/1e-6]);
       dt = min([stepfraction*d/maxV stepfraction*d^2/1e-6]);
     end
-    %dt = min([maxstepsize dt]);
     t(i+1)=t(i)+dt;
   else
     % use t vector for dt
     dt = t(i+1)-t(i);
   end
 
-  % picard itterations
+  % picard iterations
   T2last = T1;
-  %maxpicard = 20;
   for j = 1:maxpicard
     % compute beta for temperature equation
     beta2 = reshape(rhom.*cm.*(1-phi) + rhof2.*cf2.*phi,nx*nz,1);
@@ -159,13 +154,13 @@ for i = 1:nstep-1
     %T2(T2>Thot) = Thot; % kluge to prevent overshoots
 
     % damping
-    tdamp = min([j*0.1 1]);
+    %tdamp = min([j*0.04 0.4]);
     %tdamp = j*0.01;
     %tdamp = 0.3;
-    T2 = T2last+tdamp*(T2-T2last);
+    %T2 = T2last+tdamp*(T2-T2last);
     %T2 = T1+tdamp*(T2-T1);
 
-    % update T-P dependent fluid properties and Darcy velocities
+    % update T-P dependent fluid properties and darcy velocities
     mu2 = dynvisc(T2);
     rhof2 = interptim(PP,TT,RHO,P2./100000,T2); %fluid density
     cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
@@ -182,25 +177,19 @@ for i = 1:nstep-1
     PRHS = -BimpP-CimpP;
 
     % and solve:
-    %P2int = Pstiffness\PRHS;
     P2 = Pstiffness\PRHS;
-    %P2int = reshape(P2int,nz,nx);
     P2 = reshape(P2,nz,nx);
 
-    % pressure damping
-    %P2 = P1+tdamp*(P2int-P1);
-    %P2 = P1;
-
-    % update T-P dependent fluid properties and Darcy velocities
+    % update T-P dependent fluid properties and darcy velocities
     mu2 = dynvisc(T2);
     rhof2 = interptim(PP,TT,RHO,P2./100000,T2); %fluid density
     cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
 
-    % test picard itterations
+    % test picard iterations
     %beta2test(:,:,j) = beta2;
-    T2test(:,:,j) = T2;
-    P2test(:,:,j) = P2;
+    %T2test(:,:,j) = T2;
+    %P2test(:,:,j) = P2;
     %mu2test(:,:,j) = mu2;
     %rhof2test(:,:,j) = rhof2;
     %cf2test(:,:,j) = cf2;
@@ -210,43 +199,23 @@ for i = 1:nstep-1
     % convergence check
     %picardthresh = 0.01;
     %maxdel = find(abs(T2-T1)==max(max(abs(T2-T1))),1,'first');
-    maxdel = find(abs(T2-T2last)==max(max(abs(T2-T2last))),1,'first');
-
-    %if abs(T2(maxdel)-T2last(maxdel)) < 0.1 && j > 10 % picardthresh && j>10
+    %maxdel = find(abs(T2-T2last)==max(max(abs(T2-T2last))),1,'first');
+    %if abs(T2(maxdel)-T2last(maxdel)) < 0.001 && j > 2 % picardthresh && j>10
     %if abs(T2(maxdel)-T2last(maxdel))/T2last(maxdel) < picardthresh && j>10
     %if max(max(((abs(T2-T2last))./(abs(T2-T1))))) < picardthresh
     %  disp(j)
     %  outfileobj.npicard(1,i) = j;
     %  break;
     %end
-    if j==maxpicard
-      disp(i);
-      break;
-      %keyboard;
-      %error(sprintf('Picard iterations failed to converge over %i steps.', maxpicard));
-    end
+
+    % redefine T2last as T2
     T2last = T2;
+
+    % break after max picard iterations
+    if j==maxpicard
+      break;
+    end
   end
-
-  if i>20
-    keyboard;
-  end
-
-  %if j>20
-  %  keyboard;
-  %end
-  %clear T2test;
-  %clear P2test;
-  %if max(max(T2))>600
-  %  keyboard;
-  %end
-
-  %if i>350
-  %npicard = 200;
-  %end
-  %if i>351
-  %keyboard;
-  %end
 
   % shift variables
   P1 = P2;
@@ -272,7 +241,8 @@ end
 
 % print timing info
 etime = toc;
-fprintf('\n\nTotal wall time\t\t\t%.1f seconds\n',etime);
+fprintf('\n%s writen.\n\n', outfilename);
+fprintf('Total wall time\t\t\t%.1f seconds\n',etime);
 fprintf('Number of model steps\t\t%i steps\n',i+1);
 fprintf('Wall time per step\t\t%.2f seconds\n',etime/nstep);
 fprintf('Total model time\t\t%.1f years\n', tout(end)/60/60/24/365);

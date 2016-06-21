@@ -52,20 +52,22 @@ T(~cracked) = Thot;
 % restart temperature and uncracked fields if required
 if restart==1
   R = load(restartfile, 'Tout', 'crackedout', 'Pout');
-  T_res = R.Tout(:,:,end);
+  Tres = R.Tout(:,:,end);
 
   % map Tres onto current geometry if necessary
-  %if sum(size(T)==size(T_res))~=2
+  %if sum(size(T)==size(Tres))~=2
   %  if steady==0
   %    error('Geometry resizing only allowed when restarting into another steady state run.');
   %  end
 
-  if sum(size(T)==size(T_res))~=2
-    error('Geometry resizing not yet allowed');
-   
-
+  if sum(size(T)==size(Tres))~=2 % changing geometry
+    [m, n] = size(Tres);
+    if n~=nx
+      error('Restarted temperature field must have the same number of columns.');
+    end
+    T(1:m,:) = Tres;
   else % same size as restart
-    T = T_res;
+    T = Tres;
     cracked = R.crackedout(:,:,end);
   end 
 
@@ -73,7 +75,6 @@ if restart==1
   %if n~=nx
   %  error('Restarted temperature field must have the same number of columns.');
   %end
-  %T(1:m,:) = Tres;
 end
 
 %initial permeability
@@ -105,11 +106,13 @@ end
 [P,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
     PP,RHO,g,d);
 if restart==1
-  P_res = R.Pout(:,:,end);
-  if sum(size(P)==size(P_res))~=2
+  Pres = R.Pout(:,:,end);
+  if sum(size(P)==size(Pres))~=2
+    
+
     error('Geometry resizing not yet allowed');
   else % same size as restart
-    P = P_res;
+    P = Pres;
   end 
 end
 
@@ -120,7 +123,7 @@ Pbr = [ones(nz,1).*0 ones(nz,1)*0]; % closed
 Pbl = [ones(nz,1).*0 ones(nz,1)*0]; % closed
 
 % save the output to a temporary file
-inoutdir = '~/research/crackingfronts/in_out/';
+inoutdir = '../in_out/';
 [status, tmpfilename] = system(sprintf('mktemp %sinput.XXXXXX', inoutdir));
 
 % save variables to an input .mat file
