@@ -3,10 +3,12 @@
 #
 # Timothy Crone (tjcrone@gmail.com)
 
-# define input file name and directory
+# define input files
 INPUTFILE1='test44_in'
 INPUTFILE2='test45_in'
-INPUTDIRECTORY='/Users/tjc/research/crackingfronts/in_out/'
+
+# define in_out directory
+INPUTDIRECTORY=$HOME'/research/crackingfronts/in_out/'
 
 # declare a name for this job
 #PBS -N $INPUTFILE
@@ -26,11 +28,17 @@ INPUTDIRECTORY='/Users/tjc/research/crackingfronts/in_out/'
 # specify your email address
 #PBS -M tjcrone@gmail.com
 
-# switch script to src directory
-#cd $PBS_O_WORKDIR
+# do the following only on gordon
+GORDON='gordon-ln1.sdsc.edu'
+THISHOST=`hostname`
+if [[ "$THISHOST" = "$GORDON" ]]; then
 
-# load matlab module
-#module load matlab
+  # switch script to src directory
+  cd $PBS_O_WORKDIR
+
+  # load matlab module
+  module load matlab
+fi
 
 # run program
 ./run $INPUTDIRECTORY$INPUTFILE1 $INPUTDIRECTORY$INPUTFILE2
