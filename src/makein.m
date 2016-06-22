@@ -1,10 +1,7 @@
 function [tmpfilename] = makein(inputfile)
-% This function creates the input .mat file for the main function.
-% The .mat file produced will contain all the needed variables to begin
-% a new porous convection run. All units are SI, unless otherwise
-% specified. This function does not use a previously computed T-P field,
-% so calculates a hydrostatic initial pressure field from the temperature
-% field.
+% This function creates the input .mat file for the main function from the simpler
+% text input file. The .mat file produced will contain all the needed variables to
+% begin a new porous convection run. All units are SI, unless otherwise specified.
 %
 % Timothy Crone (tjcrone@gmail.com)
 
@@ -52,24 +49,28 @@ T(~cracked) = Thot;
 % restart temperature and uncracked fields if required
 if restart==1
   R = load(restartfile, 'Tout', 'crackedout', 'Pout');
-  Tres = R.Tout(:,:,end);
-
+  [m, n] = size(R.Tout(:,:,end));
+  if n~=nx
+    error('Restarted domains must have the same number of columns as the original.');
+  end
+  cracked(1:m,:) = R.crackedout(:,:,end);
+  T(1:m,:) = R.Tout(:,:,end);
   % map Tres onto current geometry if necessary
   %if sum(size(T)==size(Tres))~=2
   %  if steady==0
   %    error('Geometry resizing only allowed when restarting into another steady state run.');
   %  end
 
-  if sum(size(T)==size(Tres))~=2 % changing geometry
-    [m, n] = size(Tres);
-    if n~=nx
-      error('Restarted temperature field must have the same number of columns.');
-    end
-    T(1:m,:) = Tres;
-  else % same size as restart
-    T = Tres;
-    cracked = R.crackedout(:,:,end);
-  end 
+  %if sum(size(T)==size(Tres))~=2 % changing geometry
+  %  [m, n] = size(Tres);
+  %  if n~=nx
+  %    error('Restarted temperature field must have the same number of columns.');
+  %  end
+  %  T(1:m,:) = Tres;
+  %else % same size as restart
+  %  T = Tres;
+  %  cracked(1:m,:) = R.crackedout(:,:,end);
+  %end 
 
   %[m, n] = size(Tres);
   %if n~=nx
@@ -106,14 +107,12 @@ end
 [P,Pbound,dPdzbound,rhobound] = calcinitp(nx,nz,T,Tbt,Tbb,Ptop,TT, ...
     PP,RHO,g,d);
 if restart==1
-  Pres = R.Pout(:,:,end);
-  if sum(size(P)==size(Pres))~=2
-    
-
-    error('Geometry resizing not yet allowed');
-  else % same size as restart
-    P = Pres;
-  end 
+  P(1:m,:) = R.Pout(:,:,end);
+  %if sum(size(P)==size(Pres))~=2
+   % error('Geometry resizing not yet allowed');
+  %else % same size as restart
+  %  P = Pres;
+  %end 
 end
 
 % pressure boundary conditions (0=Neumann 1=Dirichlet)

@@ -102,8 +102,8 @@ for i = 1:nstep-1
   if steady==0
     KI=Atemp*(Tve-T1)-Apress*(Pw+rhoR*g*Z);
     cracked = ((KI>=KIc)+cracked)>0;
-    kx = koff;
-    kz = koff;
+    kx(:,:) = koff;
+    kz(:,:) = koff;
     kx(cracked) = kon;
     kz(cracked) = kon;
   end
