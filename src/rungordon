@@ -1,0 +1,36 @@
+#!/bin/bash
+# This is the script to run a crackingfront run on the Gordon compute cluster.
+#
+# Timothy Crone (tjcrone@gmail.com)
+
+# define input file name and directory
+INPUTFILE1='test44_in'
+INPUTFILE2='test45_in'
+INPUTDIRECTORY='/Users/tjc/research/crackingfronts/in_out/'
+
+# declare a name for this job
+#PBS -N $INPUTFILE
+
+# request the queue (enter the possible names, if omitted, serial is the default)
+#PBS -q normal
+
+# request 1 full node with 16 processors
+#PBS -l nodes=1:ppn=16:native
+
+# request wall time
+#PBS -l walltime=00:01:00
+
+# mail is sent to you when the job starts and when it terminates or aborts
+#PBS -m bea
+
+# specify your email address
+#PBS -M tjcrone@gmail.com
+
+# switch script to src directory
+#cd $PBS_O_WORKDIR
+
+# load matlab module
+#module load matlab
+
+# run program
+./run $INPUTDIRECTORY$INPUTFILE1 $INPUTDIRECTORY$INPUTFILE2

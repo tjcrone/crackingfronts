@@ -27,7 +27,7 @@ numFiles=$((numFiles-1))
 # loop though input files
 for i in $(seq 1 $numFiles); do
   infile=${fileList[$i]}
-  echo $infile
+  #echo $infile
 
   # create log file and temporary run file
   logfile="${infile%_*}_out.log"
@@ -37,7 +37,8 @@ for i in $(seq 1 $numFiles); do
   echo "run('$infile');" > $tmpfile
 
   # run matlab in background in parallel or sequentially
-  nohup /usr/local/bin/matlab -nodesktop -nosplash < $tmpfile > $logfile 2>&1 &
+  EXE=`which matlab`
+  nohup $EXE -nodesktop -nosplash < $tmpfile > $logfile 2>&1 &
   if [[ parallel -eq "0" ]]; then
     wait
   fi

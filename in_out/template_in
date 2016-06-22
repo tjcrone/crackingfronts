@@ -1,0 +1,50 @@
+% crackingfronts input file
+
+% stead state parameters
+steady          1 % set to unity for a steady state run. this turns cracking off
+
+% restart info
+restart         1
+restartfile     '~/research/crackingfronts/in_out/test39_out.mat'
+
+% timing
+adaptivetime    1 % set to unity for adaptive time stepping
+nstep           1000 % number of steps to complete if timing is adaptive
+outputinterval	1 % interval between steps to output. must be a devisor of nstep
+stepfraction	0.1
+%tdamp		0.1
+%picardthresh	0.01
+maxpicard	1
+
+% geometry
+nx		20 % number of grid cells in x-direction (columns)
+nz		20 % number of grid cells in z-direction (rows)
+d		50 % grid cell size (uniform grid, meters)
+
+% cracking front info
+frontdepth	1000 % depth to cracking front (m)
+
+% temperature
+Thot            600 % temperature (C)
+Tcold           0 % temperature (C)
+
+% permeability
+kon             3e-15
+koff            1e-32
+
+% boundary conditions
+Ptop		20e6 % top pressure condition
+Tbottomtype     1 % 0=Neumann, 1=Dirichlet
+Tbottomvalue    600 % temperature at or heat flux (W/m) through bottom boundary
+Ttopconduction  1 % set to unity for conduction on top boundary
+
+% fluid and rock properties
+phi		0.03 % porosity (fraction)
+
+% cracking parameters
+Apress		0.028
+Atemp		4962.3
+KIc		1e6
+Pw		200e5
+Tve		900
+rhoR		2900
