@@ -11,7 +11,7 @@ INPUTFILE2='test45_in'
 INPUTDIRECTORY=$HOME'/research/crackingfronts/in_out/'
 
 # declare a name for this job
-#PBS -N $INPUTFILE
+#PBS -N cracktest
 
 # request the queue (enter the possible names, if omitted, serial is the default)
 #PBS -q normal

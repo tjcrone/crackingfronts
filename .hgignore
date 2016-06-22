@@ -1,0 +1,9 @@
+^tmp$
+^tmp2$
+^misc$
+^.DS_Store
+^hydrotables/dens
+^hydrotables/gam
+
+syntax: glob
+in_out/test*
