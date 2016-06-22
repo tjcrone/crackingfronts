@@ -29,9 +29,8 @@ INPUTDIRECTORY=$HOME'/research/crackingfronts/in_out/'
 #PBS -M tjcrone@gmail.com
 
 # do the following only on gordon
-GORDON='gordon-ln1.sdsc.edu'
 THISHOST=`hostname`
-if [[ "$THISHOST" = "$GORDON" ]]; then
+if [[ "$THISHOST" = gordon* ]]; then
 
   # switch script to src directory
   cd $PBS_O_WORKDIR
