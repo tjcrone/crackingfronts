@@ -30,7 +30,7 @@ INPUTDIRECTORY=$HOME'/research/crackingfronts/in_out/'
 
 # do the following only on gordon
 THISHOST=`hostname`
-if [[ "$THISHOST" = gordon* ]]; then
+if [[ "$THISHOST" == gordon* ]]; then
 
   # switch script to src directory
   cd $PBS_O_WORKDIR
