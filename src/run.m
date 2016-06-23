@@ -9,6 +9,7 @@ function [] = run(inputfile)
 tmpfilename = makein(inputfile);
 
 % load the result of makein and delete the temporary mat file
+kx = 0;
 load(tmpfilename(1:end-1), '-mat');
 system(sprintf('rm %s', tmpfilename(1:end-1)));
 

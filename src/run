@@ -24,6 +24,14 @@ while [[ $# > 0 ]]; do
 done
 numFiles=$((numFiles-1))
 
+# load matlab module if on gordon
+THISHOST=`hostname`
+if [[ "$THISHOST" == gordon* ]]; then
+  # load matlab module
+  module load matlab
+fi
+
+module load matlab
 # loop though input files
 for i in $(seq 1 $numFiles); do
   infile=${fileList[$i]}
