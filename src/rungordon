@@ -1,12 +1,12 @@
 #!/bin/bash
 # declare a name for this job
-#PBS -N cracktest
+#PBS -N fivesteady
 # request the queue (enter the possible names, if omitted, serial is the default)
 #PBS -q normal
 # request 1 full node with 16 processors
 #PBS -l nodes=1:ppn=16:native
 # request wall time
-#PBS -l walltime=00:03:00
+#PBS -l walltime=03:00:00
 # mail is sent to you when the job starts and when it terminates or aborts
 #PBS -m bea
 # specify your email address
@@ -17,26 +17,26 @@
 # Timothy Crone (tjcrone@gmail.com)
 
 # define input files
-INPUTFILE1='test44_in'
-INPUTFILE2='test45_in'
+INPUTFILE1='k464e16_stead01_in'
+INPUTFILE2='k100e15_stead01_in'
+INPUTFILE3='k215e15_stead01_in'
+INPUTFILE4='k464e15_stead01_in'
+INPUTFILE5='k100e14_stead01_in'
 
-# define in_out directory
+# define directory locations
 INPUTDIRECTORY=$HOME'/research/crackingfronts/in_out/'
 SRCDIRECTORY=$HOME'/research/crackingfronts/src/'
 
 # do the following only on gordon
 THISHOST=`hostname`
-if [[ "$THISHOST" == gordon* ]]; then
+if [[ "$THISHOST" == gordon* || "$THISHOST" == gcn* ]]; then
 
   # switch script to src directory
   cd $SRCDIRECTORY
 
   # load matlab module
-  #module load matlab
+  module load matlab
 fi
 
-cd $SRCDIRECTORY
-#module load matlab
-
 # run program
-./run $INPUTDIRECTORY$INPUTFILE1 $INPUTDIRECTORY$INPUTFILE2
+./run -p $INPUTDIRECTORY$INPUTFILE1 $INPUTDIRECTORY$INPUTFILE2 $INPUTDIRECTORY$INPUTFILE3 $INPUTDIRECTORY$INPUTFILE4 $INPUTDIRECTORY$INPUTFILE5
