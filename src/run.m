@@ -89,12 +89,15 @@ mu2 = mu1;
 P2 = P1;
 T2 = T1;
 
+% initialize Tmax
+Tmax = 0;
+
 % start timer
 tic;
 
 % test stuff
-T2test = zeros([nz nx maxpicard]);
-P2test = zeros([nz nx maxpicard]);
+%T2test = zeros([nz nx maxpicard]);
+%P2test = zeros([nz nx maxpicard]);
 
 % time loop
 for i = 1:nstep-1
@@ -221,6 +224,9 @@ for i = 1:nstep-1
   % shift variables
   P1 = P2;
   T1 = T2;   
+
+  % track Tmax
+  Tmax = max([Tmax max(max(T1))]);
     
   % write outputs to outfile object
   if mod(i,nstep/nout) == 0;
@@ -234,6 +240,9 @@ for i = 1:nstep-1
     outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
     outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
     %disp(i)
+    if Tmax > Thot
+      error('Tmax is greater than Thot.');
+    end
   end
     
   % update progress bar
