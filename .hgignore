@@ -6,4 +6,4 @@
 ^hydrotables/gam
 
 syntax: glob
-in_out/test*
+in_out/*
