@@ -12,7 +12,7 @@ colormap(jet);
 colorbar;
 
 % get length of input field that is filled (non-zero)
-inputlength = max(find(squeeze(max(max(Tout)))));
+inputlength = max(find(squeeze(max(max(inputfield)))));
 
 % get range of input field
 
