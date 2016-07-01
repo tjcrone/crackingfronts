@@ -225,7 +225,7 @@ for i = 1:nstep-1
     outfileobj.qzout(:,:,i/(nstep/nout)+1) = qz2;
     outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
     outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
-    if Tmax > Thot
+    if Tmax > Thot + 0.01
       error('Tmax is greater than Thot.');
     end
   end
