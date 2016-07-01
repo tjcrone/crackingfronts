@@ -15,12 +15,14 @@ colorbar;
 inputlength = max(find(squeeze(max(max(inputfield)))));
 
 % get range of input field
+fmax = max(max(max(inputfield)));
+fmin = min(min(min(inputfield)));
 
 % loop
 for i=1:inputlength
   set(im1,'cdata',inputfield(:,:,i))
   title(i)
   drawnow
-  caxis([0 600])
+  caxis([fmin fmax])
   pause(pauselength)
 end
