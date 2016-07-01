@@ -89,12 +89,11 @@ mu2 = mu1;
 P2 = P1;
 T2 = T1;
 
+% initialize Tmax
+Tmax = 0;
+
 % start timer
 tic;
-
-% test stuff
-T2test = zeros([nz nx maxpicard]);
-P2test = zeros([nz nx maxpicard]);
 
 % time loop
 for i = 1:nstep-1
@@ -187,16 +186,6 @@ for i = 1:nstep-1
     cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
 
-    % test picard iterations
-    %beta2test(:,:,j) = beta2;
-    %T2test(:,:,j) = T2;
-    %P2test(:,:,j) = P2;
-    %mu2test(:,:,j) = mu2;
-    %rhof2test(:,:,j) = rhof2;
-    %cf2test(:,:,j) = cf2;
-    %qx2test(:,:,j) = qx2;
-    %qz2test(:,:,j) = qz2;
-
     % convergence check
     %picardthresh = 0.01;
     %maxdel = find(abs(T2-T1)==max(max(abs(T2-T1))),1,'first');
@@ -221,6 +210,9 @@ for i = 1:nstep-1
   % shift variables
   P1 = P2;
   T1 = T2;   
+
+  % track Tmax
+  Tmax = max([Tmax max(max(T1))]);
     
   % write outputs to outfile object
   if mod(i,nstep/nout) == 0;
@@ -233,7 +225,9 @@ for i = 1:nstep-1
     outfileobj.qzout(:,:,i/(nstep/nout)+1) = qz2;
     outfileobj.crackedout(:,:,i/(nstep/nout)+1) = cracked;
     outfileobj.tout(1,i/(nstep/nout)+1) = t(i+1);
-    %disp(i)
+    if Tmax > Thot
+      error('Tmax is greater than Thot.');
+    end
   end
     
   % update progress bar
