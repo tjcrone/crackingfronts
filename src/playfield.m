@@ -15,8 +15,8 @@ colorbar;
 inputlength = max(find(squeeze(max(max(inputfield)))));
 
 % get range of input field
-fmax = max(max(max(inputfield)));
-fmin = min(min(min(inputfield)));
+fmax = double(max(max(max(inputfield))));
+fmin = double(min(min(min(inputfield))));
 
 % loop
 for i=1:inputlength
