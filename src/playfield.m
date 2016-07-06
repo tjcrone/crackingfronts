@@ -1,8 +1,23 @@
-function [] = playfield(inputfield, pauselength)
+function [] = playfield(inputfield, pauselength, interval)
 % This function plays the field that is passed, usually Tout.
 %
 % Timothy Crone (tjcrone@gmail.com)
 
+% set default pauselength
+if ~exist('pauselength', 'var')
+  pauselength = 0;
+end
+if isempty(pauselength)
+  pauselength = 0;
+end
+
+% set default interval
+if ~exist('interval', 'var')
+  interval = 1;
+end
+if isempty(interval)
+  interval = 1;
+end
 
 % set up figure
 figure;
@@ -19,7 +34,7 @@ fmax = double(max(max(max(inputfield))));
 fmin = double(min(min(min(inputfield))));
 
 % loop
-for i=1:inputlength
+for i=1:interval:inputlength
   set(im1,'cdata',inputfield(:,:,i))
   title(i)
   drawnow
