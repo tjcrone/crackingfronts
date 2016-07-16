@@ -36,7 +36,7 @@ tall = [tout1 tout(2:end)+tout1(end)];
 
 % loop through remaining files
 for i = 3:length(files)
-  load(files{2});
+  load(files{i});
   Tall = cat(3, Tall, Tout(:,:,2:end));
   crackedall = cat(3, crackedall, crackedout(:,:,2:end));
   qzall = cat(3, qzall, qzout(:,:,2:end));
