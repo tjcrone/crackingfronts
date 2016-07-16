@@ -1,4 +1,4 @@
-function [tI, TI, crackedI, qzI] = sampleout()
+function [tout, Tout, crackedout, qzout] = sampleout()
 % This function samples a set of output files in time.
 %
 % Timothy Crone
@@ -45,12 +45,11 @@ end
 
 % interpolate
 tinterval = 100; % years
-tvec = 0:tinterval*365*24*60*60:tall(end);
+tout = 0:tinterval*365*24*60*60:tall(end);
 [X,Y,Z] = meshgrid(1:nx2,1:nz2,tall);
-[X2,Y2,tI] = meshgrid(1:nx2,1:nz2,tvec);
-TI = interp3(X,Y,Z,Tall,X2,Y2,tI);
-crackedI= interp3(X,Y,Z,crackedall,X2,Y2,tI);
-
+[X2,Y2,Z2] = meshgrid(1:nx2,1:nz2,tout);
+Tout = interp3(X,Y,Z,Tall,X2,Y2,Z2);
+crackedout= interp3(X,Y,Z,crackedall,X2,Y2,Z2);
 [X,Y,Z] = meshgrid(1:nx2,1:nz2+1,tall);
-[X2,Y2,tI] = meshgrid(1:nx2,1:nz2+1,tvec);
-qzI= interp3(X,Y,Z,qzall,X2,Y2,tI);
+[X2,Y2,Z2] = meshgrid(1:nx2,1:nz2+1,tout);
+qzout= interp3(X,Y,Z,qzall,X2,Y2,Z2);
