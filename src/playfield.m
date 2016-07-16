@@ -19,13 +19,6 @@ if isempty(interval)
   interval = 1;
 end
 
-% set up figure
-figure;
-im1 = imagesc(inputfield(:,:,1));
-set(gca,'dataaspectratio',[1 1 1]);
-colormap(jet);
-colorbar;
-
 % get length of input field that is filled (non-zero)
 inputlength = max(find(squeeze(max(max(inputfield)))));
 
@@ -33,11 +26,21 @@ inputlength = max(find(squeeze(max(max(inputfield)))));
 fmax = double(max(max(max(inputfield))));
 fmin = double(min(min(min(inputfield))));
 
+% set up figure
+figure;
+im1 = imagesc(inputfield(:,:,1));
+set(gca,'dataaspectratio',[1 1 1]);
+caxis([fmin fmax])
+colormap(jet);
+colorbar;
+title('1');
+drawnow;
+pause(pauselength);
+
 % loop
-for i=1:interval:inputlength
-  set(im1,'cdata',inputfield(:,:,i))
-  title(i)
-  drawnow
-  caxis([fmin fmax])
-  pause(pauselength)
+for i=1+interval:interval:inputlength
+  set(im1,'cdata',inputfield(:,:,i));
+  title(i);
+  drawnow;
+  pause(pauselength);
 end
