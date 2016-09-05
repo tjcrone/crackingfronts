@@ -68,22 +68,27 @@ tout = [tout1(1:end-1) tout2];
 %tout = 0:tinterval*365*24*60*60:tmax;
 
 % interpolate Tout
+disp('Interpolating Tout.');
 [X,Y,Z] = meshgrid(1:nx2,1:nz2,tall);
 [X2,Y2,Z2] = meshgrid(1:nx2,1:nz2,tout);
 Tout = interp3(X,Y,Z,Tall,X2,Y2,Z2);
 %clear Tall;
 
 % interpolate cfout
+disp('Interpolating cfout.');
 cfout= interp3(X,Y,Z,cfall,X2,Y2,Z2);
 
 % interpolate rhofout
+disp('Interpolating rhofout.');
 rhofout= interp3(X,Y,Z,rhofall,X2,Y2,Z2);
 
 % interpolate crackedout
+disp('Interpolating crackedout.');
 crackedout= interp3(X,Y,Z,crackedall,X2,Y2,Z2, 'nearest');
 %clear crackedall;
 
 % interpolate qzout
+disp('Interpolating qzout.');
 [X,Y,Z] = meshgrid(1:nx2,1:nz2+1,tall);
 [X2,Y2,Z2] = meshgrid(1:nx2,1:nz2+1,tout);
 qzout= interp3(X,Y,Z,qzall,X2,Y2,Z2);
