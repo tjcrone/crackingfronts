@@ -165,6 +165,8 @@ for i = 1:nstep-1
     rhof2 = interptim(PP,TT,RHO,P2./100000,T2); %fluid density
     cf2 = interptim(PP,TT,CP,P2./100000,T2); %fluid heat capacity
     [qx2,qz2] = darcy(nx,nz,P2,rhof2,rhobb,kx,kz,mu2,g,d,Pbt,Pbb,Pbr,Pbl,T2);
+
+    % calculate Se2 here using Ku2
         
     % compute P2 using implicit technique
     [AimpP,BimpP,CimpP] = pstiff(nx,nz,d,Se2,rhof2,rhobt,rhobb,rhobr,rhobl, ...
